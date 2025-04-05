@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Blibrary.Client\**" />
+    <Compile Remove="Blibrary\**" />
+    <Content Remove="Blibrary.Client\**" />
+    <Content Remove="Blibrary\**" />
+    <EmbeddedResource Remove="Blibrary.Client\**" />
+    <EmbeddedResource Remove="Blibrary\**" />
+    <None Remove="Blibrary.Client\**" />
+    <None Remove="Blibrary\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.2" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\bootstrap\css\" />
+    <Folder Include="wwwroot\css\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BLibrary.Client\Blibrary.Client.csproj" />
+    <ProjectReference Include="..\BLibrary.Shared\Blibrary.Shared.csproj" />
+  </ItemGroup>
+</Project>

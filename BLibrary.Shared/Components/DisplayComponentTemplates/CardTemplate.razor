@@ -1,0 +1,22 @@
+﻿@using Blibrary.Shared.Models
+@implements IDisplayComponentTemplate
+
+<Card>
+    <CardHeader>
+        Card Header
+    </CardHeader>
+    <CardTitle>
+        Card Title
+    </CardTitle>
+    <CardBody>
+        Card Body
+    </CardBody>
+    <CardFooter>
+        Card Footer
+    </CardFooter>
+</Card>
+
+@code {
+    [Parameter]
+    public List<ScssVariableSection> Variables { get; set; } = [];
+}

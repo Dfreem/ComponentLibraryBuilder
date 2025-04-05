@@ -1,0 +1,42 @@
+﻿@using System.Text
+@using Blibrary.Shared.Services.FileWalkerService
+
+@inject IJSRuntime _js
+@implements IAsyncDisposable
+
+
+@code
+{
+    IJSObjectReference? _module;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _module = await _js.InvokeAsync<IJSObjectReference>("import", "./js/fileDownload.js");
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async Task DownloadFile(string fileContent, string fileName, string extension)
+    {
+        if (_module is null)
+            return;
+        var fileBytes = Encoding.UTF8.GetBytes(fileContent);
+        using var fs = new MemoryStream(fileBytes);
+        using var streamRef = new DotNetStreamReference(fs);
+        fileName += "." + extension;
+        await _module.InvokeVoidAsync("download", fileName, streamRef);
+
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (_module != null)
+        {
+            await _module.DisposeAsync();
+            _module = null;
+        }
+        GC.SuppressFinalize(this);
+    }
+}

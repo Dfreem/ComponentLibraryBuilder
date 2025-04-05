@@ -1,0 +1,32 @@
+﻿@using Blibrary.Shared.Components.Base
+@using Blibrary.Shared.Components.Base
+@inherits StyleableBaseComponent
+<div class="form-check form-switch @Class" style="@Style">
+    <input class="form-check-input" type="checkbox" checked="@Value" @onchange="Toggle" role="switch" id="@Id">
+    @if (!String.IsNullOrEmpty(Label))
+    {
+        <label class="form-check-label" for="@Id">@Label</label>
+
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Label { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    [Parameter]
+    public bool Value { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ValueChanged { get; set; }
+
+    private async Task Toggle()
+    {
+        Value = !Value;
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+}

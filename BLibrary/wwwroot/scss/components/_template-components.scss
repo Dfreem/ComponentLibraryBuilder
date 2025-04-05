@@ -1,0 +1,15 @@
+﻿.accordion#accordionExample {
+    position: fixed;
+    top: 4em;
+    left: 5rem;
+    right: 5rem;
+
+}
+
+.display-modal {
+    & .modal-dialog {
+        position: fixed;
+        right: 10%;
+    }
+}
+

@@ -1,0 +1,88 @@
+﻿@using Blibrary.Shared.Components.Form
+@using Blibrary.Shared.Enums
+@using Microsoft.AspNetCore.Components.Forms
+@using Blibrary.Shared.Enums
+@inherits InputBase
+
+
+<div class="w-100">
+    <div class="mx-auto">
+        <div class="col input-group">
+            @if (Range)
+            {
+                @if (!String.IsNullOrEmpty(Text))
+                {
+                    <label class="input-group-text">@Rule.Key</label>
+                }
+                <input class="form-control" type="range" value="@Rule.Value" @oninput="SetRuleValue" />
+            }
+            else
+            {
+                @if (!String.IsNullOrEmpty(Text))
+                {
+                    <label class="input-group-text">@Step</label>
+                }
+                <input type="number" step="@Step" class="form-control" value="@Rule.Value" @oninput="SetRuleValue" />
+            }
+            <div class="fit-width">
+                <select class="form-select" value="@Rule.Unit" @onchange="(async (args) => await SetUnitValue(args))" TValue="string">
+                    @foreach (var item in Enum.GetValues<ScssSizeUnit>())
+                    {
+                        <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    List<string> unitOptions = [];
+
+    string? _originalStep;
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    public string? Step { get; set; }
+
+    [Parameter]
+    public bool Range { get; set; }
+
+    protected override void OnInitialized()
+    {
+        unitOptions = SizeUnit.GetCssUnits<ScssSizeUnit>();
+        Rule.Unit = unitOptions[0];
+        base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        _originalStep = Step;
+        base.OnParametersSet();
+    }
+
+    public async Task SetUnitValue(ChangeEventArgs args)
+    {
+        Rule.Unit = args.Value?.ToString() ?? "px";
+        if (Rule.Unit.Contains("px") || Rule.Unit.Contains("%"))
+        {
+            Step = "1";
+            Rule.Value = "0";
+        }
+        else
+        {
+            Step = "1.0";
+            Rule.Value = "0.0";
+        }
+        await RuleChanged.InvokeAsync(Rule);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void SetRuleValue(ChangeEventArgs args)
+    {
+        Rule.Value = args.Value?.ToString() ?? "";
+        RuleChanged.InvokeAsync(Rule);
+    }
+}

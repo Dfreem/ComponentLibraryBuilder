@@ -1,0 +1,31 @@
+namespace Blibrary.Shared.Enums.Generated;
+public enum FormCheckVariables
+{
+    FormCheckInputWidth,
+    FormCheckMinHeight,
+    FormCheckPaddingStart,
+    FormCheckMarginBottom,
+    FormCheckLabelColor,
+    FormCheckLabelCursor,
+    FormCheckTransition,
+    FormCheckInputActiveFilter,
+    FormCheckInputBg,
+    FormCheckInputBorder,
+    FormCheckInputBorderRadius,
+    FormCheckRadioBorderRadius,
+    FormCheckInputFocusBorder,
+    FormCheckInputFocusBoxShadow,
+    FormCheckInputCheckedColor,
+    FormCheckInputCheckedBgColor,
+    FormCheckInputCheckedBorderColor,
+    FormCheckInputCheckedBgImage,
+    FormCheckRadioCheckedBgImage,
+    FormCheckInputIndeterminateColor,
+    FormCheckInputIndeterminateBgColor,
+    FormCheckInputIndeterminateBorderColor,
+    FormCheckInputIndeterminateBgImage,
+    FormCheckInputDisabledOpacity,
+    FormCheckLabelDisabledOpacity,
+    FormCheckBtnCheckDisabledOpacity,
+    FormCheckInlineMarginEnd
+}

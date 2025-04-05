@@ -1,0 +1,41 @@
+﻿@using Blibrary.Shared.Services.FileWalkerService
+@using static Blibrary.Shared.Services.FileWalkerService.FileWalker
+
+@if (Root?.Name is not null)
+{
+
+    var filename = Root.Name.Length > 1 ? Root.Name.Split('/')[^1] : Root.Name;
+    <ul class="list-unstyled">
+        <li>
+            @filename
+        </li>
+        @if (Root.Files.Length > 0)
+        {
+            <li class="list-unstyled">
+                <ul>
+                    @foreach (var file in Root.Files)
+                    {
+                        <li>@file.Split('/')[^1]</li>
+                    }
+                </ul>
+            </li>
+        }
+        <li>
+
+            <ul>
+
+                @if (Root.Dirs.Length > 0)
+                {
+                    foreach (var node in Root.Dirs)
+                    {
+                        <FileWalkerComponent Root="node" />
+                    }
+                }
+            </ul>
+        </li>
+    </ul>
+}
+@code {
+    [Parameter]
+    public DirNode? Root { get; set; }
+}

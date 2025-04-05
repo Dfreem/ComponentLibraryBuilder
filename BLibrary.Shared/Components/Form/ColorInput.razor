@@ -1,0 +1,55 @@
+﻿@using Blibrary.Shared.Components.Form
+@using Blibrary.Shared.Models
+@using Blibrary.Shared.Models
+
+@inherits InputBase
+
+@if (Rule.IsChecked)
+{
+    <select @onchange="SetRuleValue" class="form-select col">
+        @foreach (var item in ColorVariableDropdown)
+        {
+            @if (item.Key == Rule.Key)
+            {
+                <option selected value="@item.Value">@item.Key</option>
+            }
+            else
+            {
+                <option value="@item.Value">@item.Key</option>
+            }
+        }
+    </select>
+    <input class="form-control-color col-2 p-0" type="color" value="@Rule.Value" @oninput='SetRuleValue' />
+}
+else
+{
+    <select disabled @onchange="SetRuleValue" class="form-select col">
+        @foreach (var item in ColorVariableDropdown)
+        {
+            @if (item.Key == Rule.Key)
+            {
+                <option selected value="@item.Value">@item.Key</option>
+            }
+            else
+            {
+                <option value="@item.Value">@item.Key</option>
+            }
+        }
+    </select>
+    <input disabled class="form-control-color p-0 col-2" type="color" value="@Rule.Value" />
+}
+
+
+@code {
+
+    public string InputType { get; set; } = "color";
+
+    private async Task SetRuleValue(ChangeEventArgs args)
+    {
+        Rule.Value = args.Value?.ToString()??"";
+        await RuleChanged.InvokeAsync(Rule);
+    }
+
+    [Parameter]
+    public List<ScssVariable> ColorVariableDropdown { get; set; } = [];
+}

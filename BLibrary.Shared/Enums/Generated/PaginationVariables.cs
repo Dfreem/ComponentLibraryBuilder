@@ -1,0 +1,33 @@
+namespace Blibrary.Shared.Enums.Generated;
+public enum PaginationVariables
+{
+    PaginationPaddingY,
+    PaginationPaddingX,
+    PaginationPaddingYSm,
+    PaginationPaddingXSm,
+    PaginationPaddingYLg,
+    PaginationPaddingXLg,
+    PaginationFontSize,
+    PaginationColor,
+    PaginationBg,
+    PaginationBorderRadius,
+    PaginationBorderWidth,
+    PaginationMarginStart,
+    PaginationBorderColor,
+    PaginationFocusColor,
+    PaginationFocusBg,
+    PaginationFocusBoxShadow,
+    PaginationFocusOutline,
+    PaginationHoverColor,
+    PaginationHoverBg,
+    PaginationHoverBorderColor,
+    PaginationActiveColor,
+    PaginationActiveBg,
+    PaginationActiveBorderColor,
+    PaginationDisabledColor,
+    PaginationDisabledBg,
+    PaginationDisabledBorderColor,
+    PaginationTransition,
+    PaginationBorderRadiusSm,
+    PaginationBorderRadiusLg
+}

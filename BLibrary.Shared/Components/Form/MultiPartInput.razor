@@ -1,0 +1,78 @@
+@using System.Text
+@using Blibrary.Shared.Components.Form
+@using Microsoft.AspNetCore.Components.Forms
+@using Blibrary.Shared.Enums
+@inherits InputBase
+
+<div class=" d-flex">
+    <div class="mx-auto">
+        <div class="col input-group">
+            @for (int i = 0; i < _unitSections.Length; i++)
+            {
+                int currentIndex = i;
+                <input @key='@i' type="text" class="form-control" value="@_unitSections[i]" @oninput='(async (v) => await SetRuleValue(currentIndex, v.Value?.ToString() ?? ""))' />
+            }
+            <input type="color" value="@_color" @onchange='(async (args) => await SetColorSection(args.Value?.ToString() ?? ""))' class="form-control-color" />
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    [Parameter]
+    public int NumberOfUnits { get; set; }
+
+    string[] _unitSections = [];
+    string _color = "";
+
+    // [Parameter]
+    // public bool Range { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var ruleSections = Rule.Value.Split(" ");
+        for (int i = 0; i < NumberOfUnits; i++)
+        {
+            if (i < ruleSections.Length)
+            {
+                // TODO split on unit somehow
+                _unitSections = _unitSections.Append(ruleSections[i]).ToArray();
+            }
+            else
+            {
+                _unitSections = _unitSections.Append("").ToArray();
+            }
+        }
+
+        base.OnInitialized();
+    }
+
+
+    private async Task SetRuleValue(int index, string value)
+    {
+        _unitSections[index] = value;
+        Rule.Value = BuildRuleValue();
+        await RuleChanged.InvokeAsync(Rule);
+    }
+
+    private async Task SetColorSection(string value)
+    {
+        _color = value;
+        Rule.Value = BuildRuleValue();
+        await RuleChanged.InvokeAsync(Rule);
+    }
+
+    private string BuildRuleValue()
+    {
+        StringBuilder builder = new();
+        for (int i = 0; i < _unitSections.Length; i++)
+        {
+            builder.Append(_unitSections[i] + " ");
+        }
+        builder.Append(_color);
+
+        return builder.ToString().Trim();
+
+    }
+}

@@ -1,0 +1,30 @@
+namespace Blibrary.Shared.Enums.Generated;
+public enum AccordionVariables
+{
+    AccordionPaddingY,
+    AccordionPaddingX,
+    AccordionColor,
+    AccordionBg,
+    AccordionBorderWidth,
+    AccordionBorderColor,
+    AccordionBorderRadius,
+    AccordionInnerBorderRadius,
+    AccordionBodyPaddingY,
+    AccordionBodyPaddingX,
+    AccordionButtonPaddingY,
+    AccordionButtonPaddingX,
+    AccordionButtonColor,
+    AccordionButtonBg,
+    AccordionTransition,
+    AccordionButtonActiveBg,
+    AccordionButtonActiveColor,
+    AccordionButtonFocusBorderColor,
+    AccordionButtonFocusBoxShadow,
+    AccordionIconWidth,
+    AccordionIconColor,
+    AccordionIconActiveColor,
+    AccordionIconTransition,
+    AccordionIconTransform,
+    AccordionButtonIcon,
+    AccordionButtonActiveIcon
+}

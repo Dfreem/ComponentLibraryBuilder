@@ -1,0 +1,117 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ output extension=".txt" #>  // Placeholder, actual files will be written manually
+
+<#
+    string basePath = Path.GetDirectoryName(Host.TemplateFile) + "/Generated/";
+    Directory.CreateDirectory(basePath); // Ensure output directory exists
+
+    string fileContent = File.ReadAllText(Host.ResolvePath("../wwwroot/bootstrap/scss/_variables.scss"));
+    
+    Regex sectionGrabber = new(@"//\s*scss-docs-start\b.*\n([\s\S]*?)//\s*scss-docs-end\b", RegexOptions.Multiline);
+    Regex titleGrabber = new(@"// scss-docs-start\s(.*)\n");
+    Regex ruleGrabber = new(@"\$(.*):\s+(.*);");
+
+    Dictionary<string, Dictionary<string, string>> sectionRules = new();
+    List<string> titles = new List<string>();
+
+    MatchCollection matches = sectionGrabber.Matches(fileContent);
+
+    foreach (Match match in matches)
+    {
+        Dictionary<string, string> rules = new();
+        GroupCollection groups = match.Groups;
+        Match sectionTitleMatch = titleGrabber.Match(groups[0].Value);
+        string sectionTitle = UnKabobify(sectionTitleMatch.Groups[1].Value);
+        
+        titles.Add(sectionTitle);
+        MatchCollection ruleMatches = ruleGrabber.Matches(groups[0].Value);
+
+        foreach (Match rule in ruleMatches)
+        {
+            string ruleKey = UnKabobify(rule.Groups[1].Value);
+            
+            // Ignore variables with "map" in the name
+            if (ruleKey.ToLower().Contains("map")) continue;
+
+            rules.Add(ruleKey, rule.Groups[2].Value);
+        }
+        if (rules.Count > 0) // Only add sections that have valid rules
+        {
+            sectionRules.Add(sectionTitle, rules);
+        }
+    }
+
+    foreach (string title in titles)
+    {
+        if (!sectionRules.ContainsKey(title) || sectionRules[title].Count == 0) continue;
+
+        string enumFileName = $"{basePath}{title}.cs";
+        string extensionFileName = $"{basePath}{title}Extensions.cs";
+
+        // Generate Enum
+        StringBuilder enumContent = new();
+        enumContent.AppendLine("namespace Blibrary.Shared.Enums;");
+        enumContent.AppendLine($"public enum {title}");
+        enumContent.AppendLine("{");
+
+        int counter = sectionRules[title].Count;
+        foreach (var rule in sectionRules[title])
+        {
+            enumContent.AppendLine($"    {rule.Key}" + (--counter > 0 ? "," : ""));
+        }
+
+        enumContent.AppendLine("}");
+        File.WriteAllText(enumFileName, enumContent.ToString());
+
+        // Generate Extensions
+        StringBuilder extensionContent = new();
+        extensionContent.AppendLine("namespace Blibrary.Shared.Enums;");
+        extensionContent.AppendLine($"public static class {title}Extensions");
+        extensionContent.AppendLine("{");
+
+        // ToSass() method
+        extensionContent.AppendLine($"    public static string ToSass(this {title} variable)");
+        extensionContent.AppendLine("    {");
+        extensionContent.AppendLine("        return variable switch");
+        extensionContent.AppendLine("        {");
+
+        foreach (var rule in sectionRules[title])
+        {
+            extensionContent.AppendLine($"            {title}.{rule.Key} => \"$" + ToKabobCase(rule.Key) + "\",");
+        }
+
+        extensionContent.AppendLine("            _ => \"\"");
+        extensionContent.AppendLine("        };");
+        extensionContent.AppendLine("    }");
+
+        extensionContent.AppendLine("}");
+        File.WriteAllText(extensionFileName, extensionContent.ToString());
+    }
+#>
+
+<#+
+    public static string UnKabobify(string kabob)
+    {
+        return string.Concat(kabob.Split('-').Select(word => char.ToUpper(word[0]) + word.Substring(1)));
+    }
+
+    public static string ToKabobCase(string pascalCase)
+    {
+        var result = new StringBuilder();
+        for (int i = 0; i < pascalCase.Length; i++)
+        {
+            if (i > 0 && char.IsUpper(pascalCase[i]))
+            {
+                result.Append('-');
+            }
+            result.Append(char.ToLower(pascalCase[i]));
+        }
+        return result.ToString();
+    }
+#>

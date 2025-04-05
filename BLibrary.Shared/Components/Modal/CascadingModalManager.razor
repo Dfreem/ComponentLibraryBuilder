@@ -1,0 +1,91 @@
+﻿@using Blibrary.Shared.Extensions
+@using Microsoft.AspNetCore.Components.Sections
+@using Microsoft.Extensions.Logging
+@inject ILogger<CascadingModalManager> _logger
+@inject IJSRuntime _js
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    public string Active { get; set; } = "";
+
+    public Dictionary<string, IModal> Children = [];
+
+    public bool Visible { get; set; }
+
+    /// <summary>
+    /// A child modal should call this method to register with the parent Modal Manager. <br />
+    /// The child modal must be registered with this parent manager in order to function within the app.
+    ///  </summary>
+    /// <param name="modal"></param>
+    public void AddChild(IModal modal)
+    {
+        if (!Children.TryAdd(modal.Id, modal))
+        {
+            _logger.LogError("\nattempted to add a duplicate key to the Modal dictionary\n{modalId}\n\n", modal.Id);
+        }
+        else
+        {
+            _logger.LogInformation("\nadding modal child to manager {modal}\n", modal.Id);
+            Active = modal.Id;
+        }
+
+    }
+
+    public async Task SwitchModalContent(string modalId, bool show = false)
+    {
+        if (!Children.ContainsKey(modalId))
+        {
+            _logger.LogWarning("Modal manger was unable to find modal id, {modalId}. Make sure the modal impliments IModal and that it calls `AddChild` on the CascadingModalManager", modalId);
+            return;
+        }
+        await Hide();
+        Active = modalId;
+        if (show)
+            await Show();
+    }
+
+    public async Task Show(string? modalId = null)
+    {
+        if (modalId is not null)
+        {
+            await _js.HideModal(Children[Active].ModalRef);
+            Visible = false;
+            Active = modalId;
+        }
+        await _js.ShowModal(Children[Active].ModalRef);
+        Visible = true;
+    }
+
+    public async Task Hide()
+    {
+        if (Visible)
+        {
+            await _js.HideModal(Children[Active].ModalRef);
+            Visible = false;
+        }
+    }
+
+    public async Task Toggle(string? modalId = null)
+    {
+        if(Visible)
+        {
+            await Hide();
+            if (modalId is not null)
+                Active = modalId;
+        }
+        else
+        {
+            if (modalId is not null)
+                Active = modalId;
+
+            await Show(modalId);
+        }
+    }
+}

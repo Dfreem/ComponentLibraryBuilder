@@ -1,0 +1,144 @@
+﻿@using Blibrary.Shared.Components.Modal
+@using Blibrary.Shared.Extensions
+@using Blibrary.Shared.Extensions
+@inject IJSRuntime _js
+@inject NavigationManager _nav
+@implements IModal
+
+@if (StaticBackdrop)
+{
+
+    <div class="modal @Class" id="@Id" @ref='ModalRef' data-bs-backdrop="static" aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+                @if (ModalHeader != null)
+                {
+                    <div class="modal-header">
+                        @ModalHeader
+                    </div>
+                }
+                <div class="modal-body">
+                    @ModalBody
+                </div>
+                @if (ModalFooter is not null)
+                {
+                    <div class="modal-footer">
+                        @ModalFooter
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+
+    <div class="modal @Class" id="@Id" @ref='ModalRef' aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+                @if (ModalHeader != null)
+                {
+                    <div class="modal-header">
+                        @ModalHeader
+                    </div>
+                }
+                <div class="modal-body">
+                    @ModalBody
+                </div>
+                @if (ModalFooter is not null)
+                {
+                    <div class="modal-footer">
+                        @ModalFooter
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    public CascadingModalManager? ModalManager { get; set; }
+
+    [Parameter]
+    public RenderFragment? ModalBody { get; set; }
+
+    [Parameter]
+    public RenderFragment? ModalHeader { get; set; }
+
+    [Parameter]
+    public RenderFragment? ModalFooter { get; set; }
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public bool StaticBackdrop { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> VisibleChanged { get; set; }
+
+    public ElementReference ModalRef { get; set; }
+
+    protected override void OnInitialized()
+    {
+
+        if (ModalManager is not null)
+        {
+            ModalManager.AddChild(this);
+        }
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var selfref = DotNetObjectReference.Create(this);
+            await _js.RegisterModalEvents(ModalRef, selfref, "OnShowAsync", "OnHideAsync");
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    /// <summary>
+    /// JSInvokable method called from javascript when the modal is shown.
+    /// </summary>
+    /// <remarks>
+    /// Do not call this from dotnet code.
+    /// It is used to keep the state in the js interopt code in sync with dotnet code.
+    /// </remarks>
+    /// <returns></returns>
+    [JSInvokable]
+    public async Task OnHideAsync()
+    {
+        if (Visible)
+        {
+            Visible = false;
+            ModalManager!.Visible = false;
+            await VisibleChanged.InvokeAsync(Visible);
+        }
+    }
+
+    /// <summary>
+    /// JSInvokable method called from javascript when the modal is shown.
+    /// </summary>
+    /// <remarks>
+    /// Do not call this from dotnet code.
+    /// It is used to keep the state in the js interopt code in sync with dotnet code.
+    /// </remarks>
+    [JSInvokable]
+    public async Task OnShowAsync()
+    {
+        Visible = ModalManager!.Visible = true;
+        await VisibleChanged.InvokeAsync(Visible);
+    }
+
+}

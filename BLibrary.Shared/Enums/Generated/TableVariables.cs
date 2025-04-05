@@ -1,0 +1,30 @@
+namespace Blibrary.Shared.Enums.Generated;
+public enum TableVariables
+{
+    TableCellPaddingY,
+    TableCellPaddingX,
+    TableCellPaddingYSm,
+    TableCellPaddingXSm,
+    TableCellVerticalAlign,
+    TableColor,
+    TableBg,
+    TableAccentBg,
+    TableThFontWeight,
+    TableStripedColor,
+    TableStripedBgFactor,
+    TableStripedBg,
+    TableActiveColor,
+    TableActiveBgFactor,
+    TableActiveBg,
+    TableHoverColor,
+    TableHoverBgFactor,
+    TableHoverBg,
+    TableBorderFactor,
+    TableBorderWidth,
+    TableBorderColor,
+    TableStripedOrder,
+    TableStripedColumnsOrder,
+    TableGroupSeparatorColor,
+    TableCaptionColor,
+    TableBgScale
+}

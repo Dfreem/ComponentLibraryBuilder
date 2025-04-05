@@ -1,0 +1,102 @@
+﻿@use '../../bootstrap/scss/functions';
+@use '../variables';
+
+//.form-group {
+//    padding: 0;
+//    margin-bottom: .5em;
+//    display: flex;
+//    width: 100%;
+//    gap: .5em;
+//}
+
+.form-check-input[type=checkbox] {
+    --bs-border-color: #{$grey-700} !important;
+}
+
+.form-container {
+    position: fixed;
+    top: 50vh;
+    bottom: 0;
+    left:0;
+    right:0;
+    padding-top: 1rem;
+    padding-bottom: 4rem;
+    clip-path: border-box;
+
+    /*max-width: 50%;*/
+    min-width: 600px;
+    background-color: #{$grey-100};
+    background-blend-mode: overlay;
+    padding-inline: 0;
+    border-radius: 3px;
+    box-shadow: var(--bs-box-shadow), 0 0 5px -1px black;
+    & .form-row {
+        margin-bottom: .25rem;
+        padding-inline: .25rem;
+        align-items: center;
+    }
+}
+
+.form-select,
+.form-input,
+input[type=number],
+input[type=text],
+input[type=checkbox],
+input[type=color] {
+    &:not(:disabled) {
+        box-shadow: 0px 0px 3px -1px black;
+    }
+
+    &:disabled {
+        background-color: #ababab33;
+    }
+
+    &:focus {
+        box-shadow: 0px 0px 5px -1px black;
+        border: var(--bs-border-color);
+    }
+}
+.form-select:hover {
+    cursor: pointer;
+
+}
+
+.form-header {
+    min-width: 100%;
+    max-width: 100%;
+    padding: .5em;
+    box-shadow: 0px 3px 2px -1px #{$primary};
+}
+
+.form-title {
+    font-size: 16pt;
+    color: color-contrast($secondary);
+}
+
+.form-body {
+    padding: 0;
+    padding-top: 1rem;
+
+}
+
+.color-input {
+    @extend .form-control !optional;
+    padding: 0;
+    border: none;
+    width: 100%;
+    background-color: transparent;
+}
+
+.shadow-input {
+    & > div {
+        border: 1px ridge #{$gray-200};
+        background-color: #{$gray-200};
+        padding: 2px;
+        border-radius: 4px;
+    }
+}
+
+input[type=number] {
+    padding-inline-end: 2px;
+    padding-inline-start: 6px;
+}

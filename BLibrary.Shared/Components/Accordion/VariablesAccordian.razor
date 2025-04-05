@@ -1,0 +1,52 @@
+﻿@using System.Net.Http.Json
+@using Blibrary.Shared.Models
+@using Blibrary.Shared.Components.FileWalker
+@using Blibrary.Shared.Models
+@using Blibrary.Shared.Services
+@inject HttpClient _client
+
+<div class="container">
+    <div class="ms-5 fit-width mt-5 accordion" id="style-rules-accordion">
+
+        @if (Variables.Count > 0)
+        {
+            foreach (var variableSection in Variables.OrderBy(v => v.SectionTitle))
+            {
+                <div class="accordion-item">
+
+                    <div class="accordion-header">
+                        <button type="button" data-bs-toggle="collapse" data-bs-target="#@variableSection.SectionTitle" class="accordion-button collapsed">
+                            @(variableSection.SectionTitle.Replace('-', ' ').Replace(" variables", ""))
+
+                        </button>
+                    </div>
+                    <div class="accordion-collapse collapse" data-bs-parent="#style-rules-accordion" id="@variableSection.SectionTitle">
+                        <div class="accordion-body">
+                            <ul class="list-group list-group-flush">
+
+                                @foreach (var rule in variableSection.Rules)
+                                {
+                                    var ruleName = rule.Key.Split('-');
+                                    string display = "";
+                                    for (int i = 0; i < ruleName.Length; i++)
+                                    {
+                                        var firstLetter = ruleName[i][..1];
+                                        ruleName[i] = ruleName[i].Replace(firstLetter, firstLetter.ToUpper());
+                                        display += " " + ruleName[i];
+                                    }
+                                    <li class="list-group-item">@display: @rule.Value.Replace("!default", "")</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<ScssVariableSection> Variables { get; set; } = [];
+
+}

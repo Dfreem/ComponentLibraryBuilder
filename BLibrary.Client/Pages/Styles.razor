@@ -1,0 +1,84 @@
+﻿@page "/styles"
+@using Blibrary.Shared.Models
+@using Blibrary.Shared.Services.CMSServices
+@using Microsoft.AspNetCore.Components.Sections
+@using Serilog
+@using Blibrary.Shared.Components.Accordion
+@using Blibrary.Shared.Components.Card
+@using Blibrary.Shared.Components.DisplayComponentTemplates
+@inject IStyleVariablesService _variablesService
+@attribute [StreamRendering]
+
+@if (PreviewStyles is not null)
+{
+    <style>
+        @PreviewStyles
+    </style>
+}
+
+<div class="container-flui">
+    <div class="row">
+        <div class="col">
+            @if (CurrentTemplateType is not null)
+            {
+                <DynamicComponent Type="CurrentTemplateType" Parameters="DynamicParms" />
+            }
+        </div>
+    </div>
+</div>
+<div class="bottom-panel">
+    <StylesForm CurrentSection='CurrentSection' CurrentSectionChanged="UpdateCurrentSection" @bind-Variables='Variables' />
+</div>
+
+@code {
+    public Dictionary<string, Type> ComponentTypes { get; set; } = new()
+    {
+       { "modal", typeof(ModalTemplate)},
+       { "accordion", typeof(AccordionTemplate)},
+       { "card", typeof(CardTemplate)}
+    };
+
+    public Dictionary<string, Object> DynamicParms { get; set; } = [];
+
+    public Type? CurrentTemplateType { get; set; }
+
+    public List<ScssVariableSection> Variables { get; set; } = new();
+
+    public ScssVariableSection CurrentSection { get; set; } = new();
+
+    public string? PreviewStyles { get; set; }
+
+    public async Task UpdateCurrentSection(ScssVariableSection currentSection)
+    {
+        // TODO change checkboxes when content changes
+        CurrentSection = currentSection;
+        CurrentTemplateType = CurrentSection.SectionTitle switch
+        {
+            var current when current.ToLower().Contains("modal") => ComponentTypes["modal"],
+            var current when current.ToLower().Contains("accordion") => ComponentTypes["accordion"],
+            var current when current.ToLower().Contains("card") => ComponentTypes["card"],
+            _ => null
+        };
+
+        PreviewStyles = await _variablesService.GenerateCssFromSection(CurrentSection);
+        Log.Information("Currently Editting \n{previewingRootSection}", PreviewStyles);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var variables = await _variablesService.GetVariableCollectionAsync();
+            if (variables is not null)
+                Variables = variables.Where(v => !v.IsMap).ToList();
+
+            DynamicParms.Add("Variables", Variables);
+            CurrentSection = Variables.FirstOrDefault() ?? new();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}
+

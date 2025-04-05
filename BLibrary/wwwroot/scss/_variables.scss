@@ -1,0 +1,44 @@
+﻿@use "sass:color";
+@import "../bootstrap/scss/_functions.scss";
+
+$primary: #3E6F7A;
+$primary-subtle: color.adjust($primary, $lightness: 50%);
+$secondary: #CCCCCC;
+$secondary-subtle: #eaeaea;
+$primary-emphasis: #174E51;
+$danger-subtle: #b86867;
+$body: #ffffff;
+$tertiary: #89B334;
+$tertiary-subtle: #d9e0a3;
+
+$input-border-radius: 2px;
+
+$text-white: #FFEFEF;
+$link-color: #34ACAD;
+$text-muted: #acacac77;
+
+$grey: #525755;
+$grey-500: $grey;
+$grey-600: shade-color($grey, 20%);
+$grey-700: shade-color($grey, 40%);
+$grey-800: shade-color($grey, 60%);
+$grey-900: shade-color($grey, 80%);
+$grey-400: tint-color($grey, 20%);
+$grey-300: tint-color($grey, 40%);
+$grey-200: tint-color($grey, 60%);
+$grey-100: tint-color($grey, 80%);
+
+$shadow-color: #474747;
+$border-radius: 4px;
+
+$greys: ("grey-100": $grey-100,"grey-200": $grey-200,"grey-300": $grey-300,"grey-400": $grey-400,"grey-500": $grey-500,"grey-600": $grey-600,"grey-700": $grey-700,"grey-800": $grey-800,"grey-900": $grey-900);
+
+$border-sizes: ("1": 1px, "2": 2px, "3": 3px, "4": 4px, "5": 5px);
+
+$focus-ring-box-shadow: none;
+
+
+/*:root {
+    --bs-modal-box-shadow: 0px 0px 0px black;
+}
+*/

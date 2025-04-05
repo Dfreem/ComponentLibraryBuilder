@@ -1,0 +1,39 @@
+﻿@typeparam TItems
+<div class="accordion" id="@Id">
+    @foreach (var item in Items)
+    {
+        int itemId = ItemIdSelector(item);
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#item-@itemId" aria-expanded="true" aria-controls="item-@itemId">
+                    @AccordionHeader(item)
+                </button>
+            </h2>
+            <div id="item-@itemId" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    @AccordionBody(item)
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string Id { get; set; }
+
+    [Parameter]
+    public RenderFragment<TItems> AccordionHeader { get; set; } = default!;
+
+    [Parameter]
+    public RenderFragment<TItems> AccordionBody { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public Func<TItems, int> ItemIdSelector { get; set; }
+
+    [Parameter]
+    public IList<TItems> Items { get; set; } = new List<TItems>();
+
+
+}

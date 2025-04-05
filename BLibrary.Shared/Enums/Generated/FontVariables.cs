@@ -1,0 +1,29 @@
+namespace Blibrary.Shared.Enums.Generated;
+public enum FontVariables
+{
+    FontFamilySansSerif,
+    FontFamilyMonospace,
+    FontFamilyBase,
+    FontFamilyCode,
+    FontSizeRoot,
+    FontSizeBase,
+    FontSizeSm,
+    FontSizeLg,
+    FontWeightLighter,
+    FontWeightLight,
+    FontWeightNormal,
+    FontWeightMedium,
+    FontWeightSemibold,
+    FontWeightBold,
+    FontWeightBolder,
+    FontWeightBase,
+    LineHeightBase,
+    LineHeightSm,
+    LineHeightLg,
+    H1FontSize,
+    H2FontSize,
+    H3FontSize,
+    H4FontSize,
+    H5FontSize,
+    H6FontSize
+}

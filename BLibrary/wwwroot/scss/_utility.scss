@@ -1,0 +1,57 @@
+﻿@use 'variables';
+
+@for $i from 1 through 100 {
+
+    // container units
+    .cqw-#{$i} {
+        min-width: calc($i * 1cqw) !important;
+        max-width: calc($i * 1cqw) !important;
+    }
+
+    .cqh-#{$i} {
+        min-height: calc($i * 1cqh) !important;
+        max-height: calc($i * 1cqh) !important;
+    }
+
+
+    // position
+
+    .left-#{$i} {
+        left: calc($i * 1vw) !important;
+    }
+
+    .right-#{$i} {
+        right: calc($i * 1vw) !important;
+    }
+}
+
+.size-container {
+    container-type: size;
+}
+
+.fit-width {
+    min-width: fit-content;
+    max-width: fit-content;
+}
+
+.d-contents {
+    display: contents;
+}
+
+@for $d from 1px through 10px {
+
+    @for $s from 1px through 10px {
+        .box-shadow-#{$d}-#{$s} {
+            box-shadow: #{$d} #{$d} #{$s} #{$shadow-color};
+        }
+        .box-shadow-#{$d}-#{$s}-inset {
+            box-shadow: #{$d} #{$d} #{$s} #{$shadow-color} inset;
+        }
+    }
+}
+
+@for $fs from 1pt through 40pt {
+    .fs-#{calc($fs * 2)} {
+        font-size: calc($fs * 2);
+    }
+}

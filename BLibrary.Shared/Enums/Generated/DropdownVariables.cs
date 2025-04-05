@@ -1,0 +1,30 @@
+namespace Blibrary.Shared.Enums.Generated;
+public enum DropdownVariables
+{
+    DropdownMinWidth,
+    DropdownPaddingX,
+    DropdownPaddingY,
+    DropdownSpacer,
+    DropdownFontSize,
+    DropdownColor,
+    DropdownBg,
+    DropdownBorderColor,
+    DropdownBorderRadius,
+    DropdownBorderWidth,
+    DropdownInnerBorderRadius,
+    DropdownDividerBg,
+    DropdownDividerMarginY,
+    DropdownBoxShadow,
+    DropdownLinkColor,
+    DropdownLinkHoverColor,
+    DropdownLinkHoverBg,
+    DropdownLinkActiveColor,
+    DropdownLinkActiveBg,
+    DropdownLinkDisabledColor,
+    DropdownItemPaddingY,
+    DropdownItemPaddingX,
+    DropdownHeaderColor,
+    DropdownHeaderPaddingX,
+    DropdownHeaderPaddingY,
+    DropdownHeaderPadding
+}
