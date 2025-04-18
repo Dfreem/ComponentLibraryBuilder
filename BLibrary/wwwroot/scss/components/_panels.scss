@@ -1,13 +1,19 @@
-﻿.bottom-panel {
+﻿.panel {
     position: fixed;
+    container-type: size;
+}
+
+.bottom-panel {
+    @extend .panel;
     bottom: 0;
     top: 50vh;
     left: 0;
     right: 0;
 
-    & .scroll{
+    & .scroll {
+        padding-top: 1rem;
         padding-bottom: 5rem;
-        max-height: 50vh;
         overflow-y: scroll;
+        max-height: 100cqh;
     }
 }

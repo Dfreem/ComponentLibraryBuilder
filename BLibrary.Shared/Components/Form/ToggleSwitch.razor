@@ -1,12 +1,17 @@
 ﻿@using Blibrary.Shared.Components.Base
-@using Blibrary.Shared.Components.Base
-@inherits StyleableBaseComponent
+@inherits InputBase
 <div class="form-check form-switch @Class" style="@Style">
-    <input class="form-check-input" type="checkbox" checked="@Value" @onchange="Toggle" role="switch" id="@Id">
+    @if (!Disabled)
+    {
+        <input class="form-check-input" type="checkbox" checked="@Value" @onchange="Toggle" role="switch" id="@Id" />
+    }
+    else
+    {
+        <input class="form-check-input" type="checkbox" checked="@Value" disabled />
+    }
     @if (!String.IsNullOrEmpty(Label))
     {
         <label class="form-check-label" for="@Id">@Label</label>
-
     }
 </div>
 

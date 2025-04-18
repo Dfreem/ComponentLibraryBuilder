@@ -32,6 +32,7 @@ public static class FileWalker
         EnumerationOptions option = new()
         {
             RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
             MaxRecursionDepth = 10,
             ReturnSpecialDirectories = true
         };

@@ -1,0 +1,128 @@
+﻿@using Blibrary.Client.Shared.Components.StylesForm
+@using Blibrary.Shared.Extensions
+@using Blibrary.Shared.Models
+@using Microsoft.AspNetCore.Components.Forms
+@implements IFormContent
+<div class="container-fluid">
+    <div class="row row-cols-3 form-body">
+        <div class="col scroll border-end border-1 border-grey-900 justify-content-between">
+
+            @foreach (var rule in CurrentSection.Rules.Where(r => r.InputType() == "color").OrderBy(r => r.Key))
+            {
+                var colorVariables = Variables.FirstOrDefault(v => v.SectionTitle == "color-variables")?.Rules ?? [];
+                <div class="d-flex flex-nowrap align-items-center mb-1">
+                    <div class="col">
+
+                        @if (rule.InputType() != "checkbox")
+                        {
+
+                            <div class="form-check mx-2">
+                                <label class="form-check-label mx-2">@rule.Key.KabobToTitleCase()</label>
+                                <input class="form-check-input" type="checkbox" checked="@Checks[rule.Key]" @onchange="(async (v) => await CheckboxCheck(rule.Key, Convert.ToBoolean(v.Value)))" />
+                                @* <InputCheckbox ValueExpression='(() => Checks.ContainsKey(rule.Key) && Checks[rule.Key])' *@
+                                @* ValueChanged="(async (v) => await CheckboxCheck(rule.Key, v))" *@
+                                @* class="form-check-input" /> *@
+
+                            </div>
+                        }
+                    </div>
+                    <div class="col">
+                        <ColorInput @key='rule.Key' Disabled="!Checks[rule.Key]" ColorVariableDropdown="colorVariables" Rule="rule" RuleChanged="(async (r) => await SetRuleValue.InvokeAsync((r.Key, r.Value)))"></ColorInput>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col scroll border-end border-1 border-grey-900 justify-content-between">
+
+            @foreach (var rule in CurrentSection.Rules.Where(r => r.InputType() == "number").OrderBy(r => r.Key))
+            {
+                var colorVariables = Variables.FirstOrDefault(v => v.SectionTitle == "color-variables")?.Rules ?? [];
+                <div class="d-flex flex-nowrap align-items-center mb-1">
+                    <div class="col">
+
+                        @if (rule.InputType() != "checkbox")
+                        {
+
+                            <div class="form-check mx-2">
+                                <label class="form-check-label mx-2">@rule.Key.KabobToTitleCase()</label>
+                                <input class="form-check-input" type="checkbox" checked="@Checks[rule.Key]" @onchange="(async (v) => await CheckboxCheck(rule.Key, Convert.ToBoolean(v.Value)))" />
+
+                            </div>
+                        }
+                    </div>
+                    <div class="col">
+
+                        <NumberUnitInput @key='rule.Key' Disabled="!Checks[rule.Key]" Rule="rule" RuleChanged="(async (a) => await SetRuleValue.InvokeAsync((rule.Key, a.Value?.ToString())))" />
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col scroll border-end border-1 border-grey-900 justify-content-between">
+
+            @foreach (var rule in CurrentSection.Rules.Where(r => r.InputType().Contains("multi")).OrderBy(r => r.InputType()))
+            {
+                string key = rule.Key;
+                int numSections = Convert.ToInt32(rule.InputType().Replace("multi-", "").Trim());
+                <div class="d-flex flex-nowrap align-items-center mb-1">
+                    <div class="col">
+
+                        @if (rule.InputType() != "checkbox")
+                        {
+
+                            <div class="form-check mx-2">
+                                <label class="form-check-label mx-2">@rule.Key.KabobToTitleCase()</label>
+                                <input class="form-check-input" type="checkbox" checked="@Checks[rule.Key]" @onchange="(async (v) => await CheckboxCheck(rule.Key, Convert.ToBoolean(v.Value)))" />
+                            </div>
+                        }
+                    </div>
+                    <div class="col">
+
+                        <ShadowInput Disabled="!Checks[key]" @key='key' NumberOfUnits="numSections" Rule="@rule" RuleChanged="(async (r) => await SetRuleValue.InvokeAsync((r.Key, r.Value)))" />
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<ScssVariableSection> Variables { get; set; } = new();
+
+    [Parameter]
+    public ScssVariableSection CurrentSection { get; set; } = new() { SectionTitle = "" };
+
+
+    [Parameter]
+    public EventCallback<(string Key, bool Value)> CheckRule { get; set; }
+
+    [Parameter]
+    public EventCallback<(string Key, string? Value)> SetRuleValue { get; set; }
+
+    [Parameter]
+    public EventCallback<string> CheckOptionsBox { get; set; }
+
+    public Dictionary<string, bool> Checks { get; set; } = [];
+
+    private async Task CheckboxCheck(string key, bool value)
+    {
+        if (Checks.ContainsKey(key))
+            Checks[key] = value;
+        else
+            Checks.Add(key, value);
+        await CheckRule.InvokeAsync((key, value));
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var keys = Checks.Keys;
+        if (CurrentSection.Rules.Any(r => !keys.Contains(r.Key)))
+        {
+            Checks = CurrentSection.Rules.ToDictionary(s => s.Key, s => s.IsChecked);
+            await InvokeAsync(StateHasChanged);
+        }
+        await base.OnParametersSetAsync();
+    }
+
+}

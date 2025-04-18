@@ -1,7 +1,6 @@
 ﻿@using Blibrary.Shared.Components.Form
 @using Blibrary.Shared.Enums
 @using Microsoft.AspNetCore.Components.Forms
-@using Blibrary.Shared.Enums
 @inherits InputBase
 
 
@@ -10,11 +9,14 @@
         <div class="col input-group">
             @if (Range)
             {
-                @if (!String.IsNullOrEmpty(Text))
+                if (!String.IsNullOrEmpty(Text))
                 {
                     <label class="input-group-text">@Rule.Key</label>
                 }
-                <input class="form-control" type="range" value="@Rule.Value" @oninput="SetRuleValue" />
+                if (!Disabled)
+                {
+                    <input class="form-control" type="range" value="@Rule.Value" @oninput="SetRuleValue" />
+                }
             }
             else
             {
@@ -25,12 +27,25 @@
                 <input type="number" step="@Step" class="form-control" value="@Rule.Value" @oninput="SetRuleValue" />
             }
             <div class="fit-width">
-                <select class="form-select" value="@Rule.Unit" @onchange="(async (args) => await SetUnitValue(args))" TValue="string">
-                    @foreach (var item in Enum.GetValues<ScssSizeUnit>())
-                    {
-                        <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>
-                    }
-                </select>
+                @if (!Disabled)
+                {
+                    <select class="form-select" value="@Rule.Unit" @onchange="(async (args) => await SetUnitValue(args))" TValue="string">
+                        @foreach (var item in Enum.GetValues<ScssSizeUnit>())
+                        {
+                            <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>
+                        }
+                    </select>
+                }
+                else
+                {
+
+                    <select class="form-select" value="@Rule.Unit" disabled>
+                        @foreach (var item in Enum.GetValues<ScssSizeUnit>())
+                        {
+                            <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>
+                        }
+                    </select>
+                }
             </div>
         </div>
     </div>
@@ -53,7 +68,7 @@
     protected override void OnInitialized()
     {
         unitOptions = SizeUnit.GetCssUnits<ScssSizeUnit>();
-        Rule.Unit = unitOptions[0];
+        Rule.Unit = unitOptions[1];
         base.OnInitialized();
     }
 

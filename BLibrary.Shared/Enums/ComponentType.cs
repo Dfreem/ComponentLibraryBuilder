@@ -10,6 +10,7 @@ public enum ComponentType
     None,
     Accordion,
     Modal,
+    Button,
     Options,
     Toast,
 }

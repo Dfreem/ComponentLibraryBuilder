@@ -14,7 +14,7 @@ Serilog.Core.Logger logger = new LoggerConfiguration()
     .MinimumLevel.Warning()
     .Enrich.WithExceptionDetails()
     .Enrich.FromLogContext()
-    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm} {Level:u3}] {Message:lj}{NewLine}{LogContext}{NewLine}{DemystifiedStackTraces:lj}{NewLine}{ExceptionDetails:lj}", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm} {Level:u3}] {Message:lj}{NewLine}{LogContext}{NewLine}{DemystifiedStackTraces:lj}{NewLine}{ExceptionDetails:lj}", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Debug)
     .CreateLogger();
 
 Log.Logger = logger;
@@ -24,7 +24,7 @@ builder.Logging.AddSerilog(logger);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped(sp => new HttpClient() { BaseAddress = new Uri(builder.Environment.ContentRootPath) });
+builder.Services.AddScoped(sp => new HttpClient() { BaseAddress = new Uri(builder.Configuration["BaseUrl"] ?? "") });
 builder.Services.AddControllers();
 builder.Services.AddToast(options =>
 {
@@ -32,8 +32,9 @@ builder.Services.AddToast(options =>
     options.Duration = 3000;
 });
 
+builder.Services.AddSassCompilerCore();
 builder.Services.AddTransient<BootstrapStyleService>();
-builder.Services.AddTransient<IStyleVariablesService, StyleVariablesService>();
+builder.Services.AddScoped<IStyleVariablesService, StyleVariablesService>();
 //builder.Services.AddDnsSrvServiceEndpointProvider();
 
 var app = builder.Build();

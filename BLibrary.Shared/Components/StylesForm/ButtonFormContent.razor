@@ -1,0 +1,57 @@
+﻿@using Blibrary.Client.Shared.Components.StylesForm
+@using Blibrary.Shared.Extensions
+@using Blibrary.Shared.Models
+@using Wacton.Unicolour
+@implements IFormContent
+
+<div class="container-fluid">
+    <div class="row form-title">
+        Selected Color Variations
+    </div>
+    <div class="row row-cols-3 form-body">
+        <div class="col scroll border-end border-1 border-grey-900 justify-content-between">
+            <div class="d-grid">
+                <div class="row">
+                    @foreach (var variation in CurrentSection.ColorVariations)
+                    {
+                        <div class="col-1 text-center mb-2">
+                            <div class="badge" style="@GetSwatchStyle(variation.Value)">
+                                @variation.Key
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public List<ScssVariableSection> Variables { get; set; } = new();
+
+    [Parameter]
+    public ScssVariableSection CurrentSection { get; set; } = new() { SectionTitle = "" };
+
+    [Parameter]
+    public Dictionary<string, string> Variations { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<(string Key, bool Value)> CheckRule { get; set; }
+
+    [Parameter]
+    public EventCallback<(string Key, string? Value)> SetRuleValue { get; set; }
+
+    [Parameter]
+    public EventCallback<string> CheckOptionsBox { get; set; }
+
+    private string GetSwatchStyle(string color)
+    {
+        var textColor = new Unicolour(color).GetCompliment();
+        string value = $"background-color: {color}; color: {textColor};";
+        return value;
+    }
+
+}

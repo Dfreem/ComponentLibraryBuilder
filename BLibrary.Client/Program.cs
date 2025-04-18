@@ -12,7 +12,7 @@ builder.Services.AddTransient<HttpClient>(sp =>
 {
     return sp.GetRequiredService<IHttpClientFactory>().CreateClient("default");
 });
-builder.Services.AddScoped<IStyleVariablesService, StyleVariablesService>();
+builder.Services.AddScoped<IStyleVariablesService,StyleVariablesService>();
 builder.Services.AddToast(options =>
 {
     options.Position = ToastPosition.Top | ToastPosition.Right;

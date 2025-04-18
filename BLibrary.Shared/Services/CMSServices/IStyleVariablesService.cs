@@ -1,8 +1,11 @@
 ﻿using Blibrary.Shared.Models;
 
-namespace Blibrary.Shared.Services.CMSServices;
-public interface IStyleVariablesService
+namespace Blibrary.Shared.Services.CMSServices
 {
-    Task<string> GenerateCssFromSection(ScssVariableSection section);
-    Task<List<ScssVariableSection>?> GetVariableCollectionAsync();
+    public interface IStyleVariablesService
+    {
+        Task<Stream?> Compile(List<ScssVariableSection> sections);
+        Task<string> GenerateScssFromSection(ScssVariableSection section);
+        Task<List<ScssVariableSection>?> GetVariableCollectionAsync();
+    }
 }

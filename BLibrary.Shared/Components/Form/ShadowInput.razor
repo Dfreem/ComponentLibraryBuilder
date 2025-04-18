@@ -6,18 +6,15 @@
 @inherits InputBase
 
 <div class=" d-flex shadow-input">
-    <div class="mx-auto">
-        <div class="input-group">
+    <div class="input-group">
 
-            @for (int i = 0; i < NumberOfUnits; i++)
-            {
-                int currentIndex = i;
-                <input @key='@(currentIndex.ToString() + "-number")' type="number" class="form-control" value="@_unitSections[currentIndex]" @oninput='(async (v) => await SetRuleValue(currentIndex, v.Value?.ToString() ?? ""))' />
-            }
-        </div>
-        <div class="col-12">
-            <input type="color" value="@_color" @key="@(NumberOfUnits + "-color")" @oninput='(async (args) => await SetColorSection(args.Value?.ToString() ?? ""))' class="form-control-color w-100" />
-        </div>
+        @for (int i = 0; i < NumberOfUnits; i++)
+        {
+            int currentIndex = i;
+            <input disabled="@(!Rule.IsChecked)" @key='@(currentIndex.ToString() + "-number")' type="number" class="form-control" value="@_unitSections[currentIndex]" @oninput='(async (v) => await SetRuleValue(currentIndex, v.Value?.ToString() ?? ""))' />
+        }
+        <input disabled="@(!Rule.IsChecked)" type="color" value="@_color" @key="@(NumberOfUnits + "-color")" @oninput='(async (args) => await SetColorSection(args.Value?.ToString() ?? ""))' class="@(Class + " form-control-color w-100")" />
+
     </div>
 </div>
 

@@ -35,6 +35,9 @@ public static partial class ScssRegexHelper
     [GeneratedRegex("--bs-([\\w-]+):\\s*([^;]+);")]
     public static partial Regex CssVariableGrabber();
 
+    [GeneratedRegex(@"^\s*@import\b.*$")]
+    public static partial Regex ScssImportsGrabber();
+
     public static bool IsScssMap(string scssContent)
     {
         Regex mapPattern = MapSyntaxValidator();
@@ -89,7 +92,7 @@ public static partial class ScssRegexHelper
     {
         Regex multiValueGrabber = MultiPartCssValuePattern();
         var matches = multiValueGrabber.Matches(input);
-        if(matches.Count > 0)
+        if (matches.Count > 0)
             return [.. matches[0].Groups.Values.Select(v => v.Value)];
         return [];
     }

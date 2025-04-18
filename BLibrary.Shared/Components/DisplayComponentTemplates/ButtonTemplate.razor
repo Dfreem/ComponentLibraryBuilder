@@ -1,0 +1,104 @@
+﻿@using Blibrary.Shared.Extensions
+@using Blibrary.Shared.Extensions.AppExtensions
+@using Blibrary.Shared.Models
+@using Wacton.Unicolour
+@implements IDisplayComponentTemplate
+
+<div class="container">
+    <div class="row mb-3">
+        <div class="col">
+            <h2> Available Button Colors </h2>
+            <div class="d-grid">
+                <div class="row">
+                    @foreach (var color in ColorSection)
+                    {
+                        <div class="col-2 text-center mb-2">
+
+                            <button @key="@color.Value" @onclick="(() => AddColor(color))" class="btn text-nowrap" style="@ButtonStyle(color)">
+                                @color.Value
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="border-start border-2 border-secondary ps-3">
+
+                <h2>Selected Button Colors</h2>
+                <div class="d-grid">
+                    <div class="row">
+                        @foreach (var color in SelectedColors)
+                        {
+                            <div class="col-2 text-center mb-2">
+                                <button @key="@color.Value" @onclick="(() => RemoveColor(color))" class="btn text-nowrap" style="@ButtonStyle(color)">
+                                    @color.Value
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<ScssVariableSection> Variables { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<List<ScssVariableSection>> VariablesChanged { get; set; }
+
+    [Parameter]
+    public List<ScssVariable> ColorSection { get; set; } = [];
+
+    [Parameter]
+    public List<ScssVariable> SelectedColors { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<List<ScssVariable>> SelectedColorsChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<(string Key, bool Value)> CheckRule { get; set; }
+
+  
+    protected string BgColorToTextColor(string hexColor)
+    {
+        Unicolour color = new(hexColor);
+        var inverseColor = color.GetCompliment();
+        return inverseColor.Hex;
+    }
+
+    public async Task RemoveColor(ScssVariable color)
+    {
+        SelectedColors.Remove(color);
+        ColorSection.Add(color);
+        await SelectedColorsChanged.InvokeAsync(SelectedColors);
+
+    }
+
+    public async Task AddColor(ScssVariable color)
+    {
+        if (SelectedColors.Any(c => c.Value == color.Value))
+            return;
+
+        SelectedColors.Add(color);
+        ColorSection.Remove(color);
+        await SelectedColorsChanged.InvokeAsync(SelectedColors);
+    }
+
+    private string ButtonStyle(ScssVariable color)
+    {
+        string colorStyle = $"background-color: {color.Value}; color: {BgColorToTextColor(color.Value)}";
+        return colorStyle;
+    }
+
+    private string ColorName(ScssVariable color)
+    {
+        Unicolour unicolour = new(color.Value);
+        return unicolour.Description;
+    }
+
+}

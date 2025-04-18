@@ -38,6 +38,22 @@
     display: contents;
 }
 
+.hover-pointer:hover {
+    cursor: pointer;
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+}
+
+.scrollbar-hide {
+    scrollbar-width: none;
+}
+
+.shadow-inset{
+    box-shadow: #{$shadow-inset};
+}
+
 @for $d from 1px through 10px {
 
     @for $s from 1px through 10px {

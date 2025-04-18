@@ -1,17 +1,19 @@
 ﻿function showModal(elementRef) {
-    if (elementRef == null) {
+    if (elementRef === null || elementRef.__internalId === null || typeof elementRef == 'undefined') {
         return;
-        Array.from(document.getElementsByClassName('modal')).map((e) => {
-            let modal = new bootstrap.Modal(e);
-            modal.hide();
-        });
     }
-    const visibleModal = new bootstrap.Modal(elementRef);
+    Array.from(document.getElementsByClassName('modal')).map((e) => {
+        let modal = bootstrap.Modal.getOrCreateInstance(e);
+        modal.hide();
+    });
+    const visibleModal = bootstrap.Modal.getOrCreateInstance(elementRef);
     visibleModal.show();
 }
 
 function hideModal(elementRef) {
-    console.log("hiding modal", elementRef);
+    if (elementRef === null || elementRef.__internalId === null || typeof elementRef == 'undefined') {
+        return;
+    }
     let modal = bootstrap.Modal.getOrCreateInstance(elementRef);
     if (!modal) {
         console.log('could not get an instance of modal, creating new.');
@@ -24,8 +26,7 @@ function hideModal(elementRef) {
 }
 
 function registerModalEvents(modalRef, dotnetRef, callOnShow, callOnHide) {
-    console.log("modalRef while registering modal", modalRef);
-    if (modalRef == null) {
+    if (modalRef === null || modalRef.__internalId === null || typeof modalRef == 'undefined') {
         console.log("modal ref is null, showing dotnetRef");
         return;
     }
@@ -36,3 +37,11 @@ function registerModalEvents(modalRef, dotnetRef, callOnShow, callOnHide) {
         dotnetRef.invokeMethodAsync(callOnHide);
     });
 }
+//function buildStyles(content, importPaths) {
+//    let sass = new Sass();
+//    let compiled = sass.compileString(content, {loadPaths: importPaths});
+//    console.log(compiled);
+//    console.log(content);
+//    console.log(importPaths);
+//}
+

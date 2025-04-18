@@ -11,6 +11,8 @@ public class ScssVariable
     public string Key { get; set; } = "";
     public string Value { get; set; } = "";
 
+    public bool IsVariable { get; set; }
+
     private string _original = "";
 
     private string _unit = "";
@@ -39,11 +41,24 @@ public class ScssVariable
         return result;
     }
 
-    public string ToCss()
+    public string ToCss(string prefix = "--bs-")
     {
-        string value = "--bs-";
+        string value = IsVariable ? prefix:"";
         value += Key.Kabobify().Replace("$", "") + ": " + Value + Unit + ";";
         return value;
+    }
+
+    public string ToScss(int indentLevel = 1)
+    {
+        string key = Key;
+        for (int i = 0; i < indentLevel; i++)
+        {
+            key += "\t";
+        }
+        if (key.Contains('$'))
+            return $"{key}: {Value};";
+
+        return $"${key}: {Value}";
     }
 
 }

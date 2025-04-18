@@ -1,15 +1,23 @@
 ﻿.accordion#accordionExample {
     position: fixed;
     top: 4em;
-    left: 5rem;
+    left: 50vw;
     right: 5rem;
-
 }
 
 .display-modal {
+    --bs-modal-zindex: -1;
+
     & .modal-dialog {
         position: fixed;
         right: 10%;
     }
 }
 
+.btn-panel {
+    background-color: #44444410;
+    padding: .5rem;
+    height: 45vh;
+    border-radius: 2px;
+    border: 2px groove #44444444;
+}

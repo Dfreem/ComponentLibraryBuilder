@@ -1,0 +1,25 @@
+﻿@use 'variables';
+
+// none of these are supported in most browsers yet
+
+.scroll {
+    --scrollbar-width: #{$scrollbar-width};
+    --scrollbar-color: #{$scrollbar-color};
+    --scrollbar-base-color: #{$scrollbar-base-color};
+    --scrollbar-arrow-color: #{$scrollbar-arrow-color};
+    --scrollbar-face-color: #{$scrollbar-face-color};
+    --scrollbar-gutter: #{$scrollbar-gutter};
+    --scrollbar-shadow-color: #{$scrollbar-shadow-color};
+    --scrollbar-3dlight-color: #{$scrollbar-3dlight-color};
+    --scrollbar-darkshadow-color: #{$scrollbar-darkshadow-color};
+
+    scrollbar-base-color: var(--scrollbar-base-color);
+    scrollbar-color: var(--scrollbar-color);
+    scrollbar-width: var(--scrollbar-width);
+    scrollbar-arrow-color: var(--scrollbar-arrow-color);
+    scrollbar-face-color: var(--scrollbar-face-color);
+    scrollbar-gutter: #{$scrollbar-gutter};
+    scrollbar-shadow-color: #{$scrollbar-shadow-color};
+    scrollbar-3dlight-color: #{$scrollbar-3dlight-color};
+    scrollbar-darkshadow-color: #{$scrollbar-darkshadow-color};
+}

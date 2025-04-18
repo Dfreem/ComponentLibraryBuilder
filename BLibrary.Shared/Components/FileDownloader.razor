@@ -30,6 +30,16 @@
         await _module.InvokeVoidAsync("download", fileName, streamRef);
 
     }
+
+    public async Task DownloadFile(Stream fileContent, string fileName, string extension)
+    {
+        if (_module is null)
+            return;
+        using var streamRef = new DotNetStreamReference(fileContent);
+        fileName += "." + extension;
+        await _module.InvokeVoidAsync("download", fileName, streamRef);
+
+    }
     public async ValueTask DisposeAsync()
     {
         if (_module != null)

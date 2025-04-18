@@ -1,11 +1,10 @@
 ﻿@using Blibrary.Shared.Components.Modal
 @using Blibrary.Shared.Extensions
-@using Blibrary.Shared.Extensions
 @inject IJSRuntime _js
 @inject NavigationManager _nav
-@implements IModal
+@inherits ModalBase
 
-@if (StaticBackdrop)
+@if (Backdrop == BackdropOptions.Static)
 {
 
     <div class="modal @Class" id="@Id" @ref='ModalRef' data-bs-backdrop="static" aria-hidden="true">
@@ -31,7 +30,7 @@
         </div>
     </div>
 }
-else
+else if (Backdrop == BackdropOptions.True)
 {
 
     <div class="modal @Class" id="@Id" @ref='ModalRef' aria-hidden="true">
@@ -57,10 +56,34 @@ else
         </div>
     </div>
 }
+else
+{
+    
+    <div class="modal @Class" id="@Id" @ref='ModalRef' data-bs-backdrop="false" aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+                @if (ModalHeader != null)
+                {
+                    <div class="modal-header">
+                        @ModalHeader
+                    </div>
+                }
+                <div class="modal-body">
+                    @ModalBody
+                </div>
+                @if (ModalFooter is not null)
+                {
+                    <div class="modal-footer">
+                        @ModalFooter
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
 
 @code {
-    [CascadingParameter]
-    public CascadingModalManager? ModalManager { get; set; }
 
     [Parameter]
     public RenderFragment? ModalBody { get; set; }
@@ -75,10 +98,7 @@ else
     public string? Class { get; set; }
 
     [Parameter]
-    public bool StaticBackdrop { get; set; }
-
-    [Parameter]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public BackdropOptions Backdrop { get; set; }
 
     [Parameter]
     public bool Visible { get; set; }
@@ -86,11 +106,8 @@ else
     [Parameter]
     public EventCallback<bool> VisibleChanged { get; set; }
 
-    public ElementReference ModalRef { get; set; }
-
     protected override void OnInitialized()
     {
-
         if (ModalManager is not null)
         {
             ModalManager.AddChild(this);
@@ -102,7 +119,7 @@ else
     {
         if (firstRender)
         {
-            var selfref = DotNetObjectReference.Create(this);
+            using var selfref = DotNetObjectReference.Create(this);
             await _js.RegisterModalEvents(ModalRef, selfref, "OnShowAsync", "OnHideAsync");
         }
         await base.OnAfterRenderAsync(firstRender);
@@ -122,7 +139,6 @@ else
         if (Visible)
         {
             Visible = false;
-            ModalManager!.Visible = false;
             await VisibleChanged.InvokeAsync(Visible);
         }
     }
@@ -137,8 +153,15 @@ else
     [JSInvokable]
     public async Task OnShowAsync()
     {
-        Visible = ModalManager!.Visible = true;
+        Visible =  true;
         await VisibleChanged.InvokeAsync(Visible);
     }
 
+
+    public enum BackdropOptions
+    {
+        True,
+        False,
+        Static
+    }
 }

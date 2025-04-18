@@ -1,4 +1,6 @@
-﻿using Blibrary.Shared.Enums;
+﻿using Blibrary.Shared.Components.DisplayComponentTemplates;
+using Blibrary.Shared.Components.StylesForm;
+using Blibrary.Shared.Enums;
 using Blibrary.Shared.Helpers;
 
 using Serilog;
@@ -18,12 +20,22 @@ public partial class ScssVariableSection
     // TODO parse and set this on instantiation
     public ComponentType SectionType { get; set; }
 
+    public Type GetComponentType()
+    {
+        return SectionTitle switch
+        {
+            "btn" => typeof(ButtonTemplate),
+            _ => typeof(DefaultFormContent)
+        };
+    }
+
     public bool IsMap { get; set; }
 
     public List<ScssVariable> Rules { get; set; } = [];
 
+    public List<ScssVariable> ColorVariations { get; set; } = [];
 
-    public List<string> NonEditableRules { get; set; } = [];
+    public List<ScssVariable> NonEditableRules { get; set; } = [];
 
     /// <summary>
     /// Return stringified scss version of this section. The content is prepended by scss docs markers and it's title
@@ -40,7 +52,33 @@ public partial class ScssVariableSection
         return result;
     }
 
-    public string ToCssSection()
+    public string ToCssSection(bool includeRules = true)
+    {
+
+        if (!Rules.Any(r => r.IsChecked))
+        {
+            return "";
+        }
+        string result = $".{SectionTitle} {{\n";
+        foreach (var rule in Rules.Where(r => r.IsChecked))
+        {
+            result += $"{rule.ToCss()}\n";
+        }
+        result += "\n";
+
+        if (!includeRules)
+            return result;
+
+
+        foreach (var rule in NonEditableRules)
+        {
+            result += $"\t{rule.ToCss()}\n";
+        }
+        result += "}\n";
+        return result;
+    }
+
+    public string ToScssSection()
     {
 
         if (!Rules.Any(r => r.IsChecked))
@@ -50,13 +88,9 @@ public partial class ScssVariableSection
         string result = "";
         foreach (var rule in Rules.Where(r => r.IsChecked))
         {
-            result += $"{rule.ToCss()}\n";
+            result += $"{rule.ToScss()};\n";
         }
         result += "\n";
-        foreach (var rule in NonEditableRules)
-        {
-            result += $"\t{rule}\n";
-        }
         //if (Common.Any(c => c.IsChecked))
         //{
         //    foreach (var rule in Common.Where(r => r.IsChecked))
@@ -73,11 +107,13 @@ public partial class ScssVariableSection
     }
     public ScssVariableSection(string sectionString, string sectionName)
     {
-        SectionTitle = sectionName ;
-        ProcessSection(sectionString);
+        SectionTitle = sectionName;
+        ProcessCssSection(sectionString);
 
     }
-    private void ProcessSection(string sectionString, bool preserverRules = false)
+
+
+    private void ProcessCssSection(string sectionString, bool preserverRules = false)
     {
         string pattern = $"\\.{SectionTitle}" + @"-?\w*\W*{([^}])*}";
         Regex sectionGrabber = new(pattern);
@@ -94,14 +130,21 @@ public partial class ScssVariableSection
         Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
         var rules = ruleGrabber.Matches(sectionMatch.Value);
         NonEditableRules = rules.Where(r => !r.Groups[1].Value.Trim().StartsWith("--"))
-            .Select(r => r.Groups[0].Value.Trim())
+            .Select(r => new ScssVariable()
+            {
+                Key = r.Groups[1].Value.Trim(),
+                Original = r.Groups[2].Value.Trim(),
+                Value = r.Groups[2].Value.Trim(),
+                IsVariable = false
+            })
             .ToList();
 
-        var ruleList = rules.Where(r => r.Success && !r.Groups[1].Value.Contains("zindex") && !NonEditableRules.Contains(r.Groups[0].Value.Trim())) // ignore z-index variables
+        var ruleList = rules.Where(r => r.Success && !r.Groups[1].Value.Contains("zindex") && !NonEditableRules.Any(s => s.Key == r.Groups[1].Value.Trim())) // ignore z-index variables
             .Select(r => new ScssVariable()
             {
                 Key = r.Groups[1].Value.Replace("--bs-", "").Trim(),
                 Original = r.Groups[1].Value.Trim(),
+                IsVariable = true,
                 Value = r.Groups.Count > 2 ? r.Groups[2].Value.Trim() : ""
             }).DistinctBy(r => r.Key);
         Rules.AddRange(ruleList);
@@ -110,21 +153,5 @@ public partial class ScssVariableSection
         Rules = [.. Rules.DistinctBy(r => r.Key)];
     }
 
-}
-
-
-public static class SectionListExstensions
-{
-    public static string ToCss(this List<ScssVariableSection> sectionList)
-    {
-        string result = "";
-        foreach (var section in sectionList.Where(s => s.Rules.Any(r => r.IsChecked)))
-        {
-            result += "." + section.SectionTitle + "{\n";
-            result += "\t" + section.ToCssSection();
-            result += "\n}\n";
-        }
-        return result;
-    }
 }
 

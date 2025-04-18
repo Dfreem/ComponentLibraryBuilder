@@ -1,6 +1,6 @@
 ﻿@use "sass:color";
-@import "../bootstrap/scss/_functions.scss";
-
+@import "../lib/bootstrap/scss/_functions.scss";
+/*#region COLORS*/
 $primary: #3E6F7A;
 $primary-subtle: color.adjust($primary, $lightness: 50%);
 $secondary: #CCCCCC;
@@ -11,7 +11,6 @@ $body: #ffffff;
 $tertiary: #89B334;
 $tertiary-subtle: #d9e0a3;
 
-$input-border-radius: 2px;
 
 $text-white: #FFEFEF;
 $link-color: #34ACAD;
@@ -29,14 +28,31 @@ $grey-200: tint-color($grey, 60%);
 $grey-100: tint-color($grey, 80%);
 
 $shadow-color: #474747;
+$shadow-inset: 0px 1px 2px -1px #{$shadow-color} inset;
 $border-radius: 4px;
 
 $greys: ("grey-100": $grey-100,"grey-200": $grey-200,"grey-300": $grey-300,"grey-400": $grey-400,"grey-500": $grey-500,"grey-600": $grey-600,"grey-700": $grey-700,"grey-800": $grey-800,"grey-900": $grey-900);
+
+/*#endregion*/
+
+/*#region SCROLL*/
+
+$scrollbar-width: thin;
+$scrollbar-color: $primary-subtle;
+$scrollbar-base-color: $secondary;
+$scrollbar-arrow-color: color.adjust($primary, $lightness: 12%);
+$scrollbar-face-color: $secondary;
+$scrollbar-gutter: none;
+$scrollbar-shadow-color: $shadow-color;
+$scrollbar-3dlight-color: color.adjust($shadow-color, $lightness: 15%);
+$scrollbar-darkshadow-color: color.adjust($shadow-color, $lightness: -10%);
+/*#endregion*/
 
 $border-sizes: ("1": 1px, "2": 2px, "3": 3px, "4": 4px, "5": 5px);
 
 $focus-ring-box-shadow: none;
 
+$input-border-radius: 2px;
 
 /*:root {
     --bs-modal-box-shadow: 0px 0px 0px black;

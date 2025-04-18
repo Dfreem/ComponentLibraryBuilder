@@ -1,21 +1,24 @@
-﻿@import "../bootstrap/scss/functions";
+﻿@import "../lib/bootstrap/scss/functions";
 @import "options";
 @import "variables";
-@import "../bootstrap/scss/_variables";
+@import "../lib/bootstrap/scss/_variables";
 
 // MAPS
 
 $all-colors: map-merge-multiple($blues, $indigos, $purples, $pinks, $reds, $oranges, $yellows, $greens, $teals, $cyans, $greys);
 $theme-colors: map-merge-multiple($theme-colors, $all-colors, ("primary": $primary, "primary-subtle": $primary-subtle, "secondary": $secondary,  "secondary-subtle": $secondary-subtle, "tertiary":$tertiary));
 
-@import "../bootstrap/scss/maps";
-@import "../bootstrap/scss/mixins";
-@import "../bootstrap/scss/root";
-@import "../bootstrap/scss/utilities";
-@import "../bootstrap/scss/helpers/_focus-ring.scss";
-@import "../bootstrap/scss/accordion";
-@import "../bootstrap/scss/modal";
+@import "../lib/bootstrap/scss/maps";
+@import "../lib/bootstrap/scss/mixins";
+@import "../lib/bootstrap/scss/root";
+@import "../lib/bootstrap/scss/utilities";
+@import "../lib/bootstrap/scss/helpers/_focus-ring.scss";
+@import "../lib/bootstrap/scss/accordion";
+@import "../lib/bootstrap/scss/modal";
 
+@import "scroll";
+
+@import "components/templates/modal";
 @import "components/form";
 @import "components/toast";
 @import "components/modal";
@@ -29,4 +32,4 @@ $theme-colors: map-merge-multiple($theme-colors, $all-colors, ("primary": $prima
 
 $utilities: map-merge( $utilities, ( "color": map-merge( map-get($utilities, "color"), ( values: map-merge( map-get(map-get($utilities, "text-color"), "values"), ( $all-colors ))))));
 
-@import "../bootstrap/scss/utilities/_api.scss";
+@import "../lib/bootstrap/scss/utilities/_api.scss";

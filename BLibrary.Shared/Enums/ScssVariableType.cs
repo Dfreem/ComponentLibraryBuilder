@@ -21,10 +21,10 @@ public enum ScssVariableType
 public enum ScssSizeUnit
 {
     None,
+    PX,
     Percent,
     EM,
     REM,
-    PX,
     VW,
     VH,
     CQW,

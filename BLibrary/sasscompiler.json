@@ -1,0 +1,17 @@
+{
+  "Source": "wwwroot/temp/scss",
+  "Target": "wwwroot/temp/css",
+  "Arguments": "",
+  "IncludePaths": [
+    "wwwroot/llib/bootstrap/scss/_functions.scss",
+    "wwwroot/llib/bootstrap/scss/_variables.scss",
+    "wwwroot/llib/bootstrap/scss/bootstrap.scss"
+  ],
+
+  // You can override specific options based on the build configuration
+  "Configurations": {
+    "Debug": { // These options apply only to Debug builds
+      "Arguments": "--error-css"
+    }
+  }
+}

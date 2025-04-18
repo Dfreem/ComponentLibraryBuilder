@@ -1,56 +1,82 @@
-﻿@using Blibrary.Shared.Models
+﻿@using Blibrary.Shared.Components.Modal
+@using Blibrary.Shared.Models
 @implements IDisplayComponentTemplate
 
 <!-- Button trigger modal -->
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <button class="btn btn-primary" @onclick="Toggle">
-                Toggle Modal
-            </button>
+            @if (HasFooter)
+            {
 
-            <div class="modal display-modal @VisibilityClass">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
+                <Modal Class='@($"display-modal {VisibilityClass}")' Id="template-modal" Backdrop="Modal.BackdropOptions.False">
+                    <ModalHeader>
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button @onclick="Hide" type="button" class="btn-close" aria-label="Close"></button>
 
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                            <button @onclick="Hide" type="button" class="btn-close" aria-label="Close"></button>
+                    </ModalHeader>
+                    <ModalBody>
+                        <div class="row">
+                            <div class="col">
+                                Modal Variables: <br />
+                            </div>
                         </div>
-                        <div class="modal-body">
+
+                        @foreach (var item in Variables.Where(v => v.SectionTitle == "modal"))
+                        {
                             <div class="row">
                                 <div class="col">
-                                    Modal Variables: <br />
+                                    @item.SectionTitle
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="d-flex flex-wrap">
+                                        @((MarkupString)item.ToCssSection(false).Replace(";", ";<br />"))
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </ModalBody>
+                    <ModalFooter>
+                        Modal Footer
+                    </ModalFooter>
+                </Modal>
+            }
+            else
+            {
 
-                            @foreach (var item in Variables.Where(v => v.SectionTitle == "modal"))
-                            {
-                                <div class="row">
-                                    <div class="col">
-                                        @item.SectionTitle
+                <Modal Class='@($"display-modal {VisibilityClass}")' Id="template-modal" Backdrop="Modal.BackdropOptions.False">
+                    <ModalHeader>
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button @onclick="Hide" type="button" class="btn-close" aria-label="Close"></button>
+
+                    </ModalHeader>
+                    <ModalBody>
+                        <div class="row">
+                            <div class="col">
+                                Modal Variables: <br />
+                            </div>
+                        </div>
+
+                        @foreach (var item in Variables.Where(v => v.SectionTitle == "modal"))
+                        {
+                            <div class="row">
+                                <div class="col">
+                                    @item.SectionTitle
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="d-flex flex-wrap">
+                                        @((MarkupString)item.ToCssSection(false).Replace(";", ";<br />"))
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="d-flex flex-wrap">
-                                            @((MarkupString)item.ToCssSection().Replace(";", ";<br />"))
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                        <div class="modal-footer">
-                            <button @onclick="Hide" type="button" class="btn btn-secondary">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                            </div>
+                        }
+                    </ModalBody>
+                </Modal>
+            }
         </div>
     </div>
 </div>
@@ -58,18 +84,30 @@
     [Parameter]
     public List<ScssVariableSection> Variables { get; set; } = [];
 
+    [Parameter]
+    public List<ScssVariable> ColorSection { get; set; } = [];
+
+    [Parameter]
+    public List<ScssVariable> SelectedColors { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<List<ScssVariable>> SelectedColorsChanged { get; set; }
+
+    [Parameter]
+    public bool HasFooter { get; set; }
+
     public string VisibilityClass { get; set; } = "d-contents";
 
     bool _visible = true;
 
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string Id { get; set; } = "exampleModal";
 
     protected override async Task OnInitializedAsync()
     {
-        Id = "exampleModal";
         Show();
         await base.OnInitializedAsync();
     }
+
     public void Show()
     {
         _visible = true;
@@ -88,4 +126,5 @@
         VisibilityClass = _visible ? "d-contents" : "d-none";
 
     }
+
 }

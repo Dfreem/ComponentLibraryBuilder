@@ -10,10 +10,6 @@ using Blibrary.Shared.Helpers;
 namespace Blibrary.Services;
 public class BootstrapStyleService
 {
-    private Dictionary<string, string> _replacements = new()
-    {
-        {"buttons", "btn" }
-    };
 
     private string[] _ignore = [
         "close",
@@ -34,8 +30,7 @@ public class BootstrapStyleService
     private string[] _include = [
         "modal",
         "accordion",
-        ""
-
+        "btn"
         ];
 
     public BootstrapStyleService()
@@ -47,28 +42,31 @@ public class BootstrapStyleService
         List<ScssVariableSection> results = new();
         try
         {
-            string bootstrapCss = await File.ReadAllTextAsync(Path.GetFullPath("./wwwroot/scss/components/templates/_accordion.scss"));
-            //string bootstrapCss = await File.ReadAllTextAsync(Path.GetFullPath("./wwwroot/bootstrap/css/bootstrap.css"));
-            string bootstrapScssVariables = await File.ReadAllTextAsync(Path.GetFullPath("./wwwroot/bootstrap/scss/_variables.scss"));
-
-            // use the filenames to find section variables inside the compiled css file. These file names match the section title and variable prefix
-            // example: scss filename -> _modal.scss; section variable prefix -> modal
-            // in the example, modal will be able to find any css classes that begin with modal
-            //var bsFiles = Directory.GetFiles("wwwroot/bootstrap/scss/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
-            var templateFiles = Directory.GetFiles("wwwroot/scss/components/templates/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
+            Regex scssSectionGrabber = ScssRegexHelper.ScssSectionGrabber();
             Regex titleGrabber = ScssRegexHelper.ScssSectionStartPattern();
             Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
-            Regex scssSectionGrabber = ScssRegexHelper.ScssSectionGrabber();
+            string bootstrapScssVariables = await File.ReadAllTextAsync(Path.GetFullPath("./wwwroot/lib/bootstrap/scss/_variables.scss"));
+            var templateFiles = Directory.GetFiles("wwwroot/scss/components/templates/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
             var sections = scssSectionGrabber.Matches(bootstrapScssVariables);
 
-            // this is a local function because I'm lazy
-            foreach (var file in templateFiles)
+            foreach (var item in templateFiles)
             {
-
-                ScssVariableSection section = new(bootstrapCss, file);
-                if (section.Rules.Count == 0)
-                    continue;
-                results.Add(section);
+                try
+                {
+                    // use the filenames to find section variables inside the compiled css file. These file names match the section title and variable prefix
+                    // example: scss filename -> _modal.scss; section variable prefix -> modal
+                    // in the example, modal will be able to find any css classes that begin with modal
+                    //var bsFiles = Directory.GetFiles("wwwroot/bootstrap/scss/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
+                    var fileStyle = await File.ReadAllTextAsync(Path.GetFullPath($"./wwwroot/scss/components/templates/_{item}.scss"));
+                    ScssVariableSection section = new(fileStyle, item);
+                    if (section.Rules.Count == 0)
+                        continue;
+                    results.Add(section);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("unable to parse file {item}\n {ex}", ex);
+                }
             }
 
             // theme color variables for populating color dropdown by variable name
@@ -80,11 +78,20 @@ public class BootstrapStyleService
                 var scssRuleGrabber = ScssRegexHelper.ScssRuleGrabber();
                 var rules = scssRuleGrabber.Matches(colorVartiablesSection.Value);
                 var ruleList = rules.Where(r => r.Success && !r.Groups[1].Value.Contains("zindex") && r.Groups[2].Value.ScssIsColor()) // ignore z-index variables
-                    .Select(r => new ScssVariable()
+                    .Select(r =>
                     {
-                        Key = r.Groups[1].Value,
-                        Original = r.Groups[1].Value,
-                        Value = r.Groups.Count > 2 ? r.Groups[2].Value.Replace("!default", "") : ""
+                        string value = r.Groups.Count > 2 ? r.Groups[2].Value.Replace("!default", "").Trim() : "";
+                        string noHashtag = value.Replace("#", "");
+                        if (noHashtag.Length <= 3)
+                        {
+                            value = value + noHashtag;
+                        }
+                        return new ScssVariable()
+                        {
+                            Key = r.Groups[1].Value,
+                            Original = r.Groups[1].Value,
+                            Value = value
+                        };
                     }).DistinctBy(r => r.Key);
 
                 themeColorVariables.Rules.AddRange(ruleList);

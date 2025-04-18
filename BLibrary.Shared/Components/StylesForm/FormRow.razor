@@ -1,0 +1,35 @@
+﻿@using Blibrary.Shared.Extensions
+@using Blibrary.Shared.Models
+
+@code {
+    [Parameter, EditorRequired]
+    public required ScssVariable Rule { get; set; }
+
+    [Parameter]
+    public EventCallback<ScssVariable> RuleChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<(string, string)> SetRuleValue { get; set; }
+
+    [Parameter]
+    public EventCallback<string> CheckOptionsBox { get; set; }
+
+    [Parameter]
+    public bool IsChecked { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsCheckedChanged { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+    }
+
+    private async Task CheckboxCheck(string key, bool value)
+    {
+        IsChecked = value;
+        await IsCheckedChanged.InvokeAsync(IsChecked);
+        Rule.IsChecked = value;
+    }
+
+}

@@ -17,13 +17,28 @@ public interface IModal
     public string Id { get; set; }
 
     public ElementReference ModalRef { get; set; }
+    public bool NoJS { get; set; }
 }
 
-public abstract class ModalBase : ComponentBase, IModal
+public abstract class ModalBase : ComponentBase, IModal, IAsyncDisposable
 {
     [CascadingParameter]
     public CascadingModalManager? ModalManager { get; set; }
     [Parameter]
-    public string Id { get; set; } = "";
+    public string Id { get; set; } = Guid.NewGuid().ToString();
     public ElementReference ModalRef { get; set; } = new();
+
+    [Parameter]
+    public bool NoJS { get; set; }
+
+    public ValueTask DisposeAsync()
+    {
+        if (ModalManager is not null)
+        {
+            ModalManager.RemoveChild(this);
+        }
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 }
+

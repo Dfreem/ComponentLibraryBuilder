@@ -1,4 +1,4 @@
-﻿@use '../../bootstrap/scss/functions';
+﻿@use '../../lib/bootstrap/scss/functions';
 @use '../variables';
 
 //.form-group {
@@ -19,7 +19,6 @@
     bottom: 0;
     left:0;
     right:0;
-    padding-top: 1rem;
     padding-bottom: 4rem;
     clip-path: border-box;
 
@@ -65,20 +64,13 @@ input[type=color] {
     min-width: 100%;
     max-width: 100%;
     padding: .5em;
-    box-shadow: 0px 3px 2px -1px #{$primary};
+    box-shadow: 0px 1px 5px -1px #{$shadow-color};
 }
 
 .form-title {
     font-size: 16pt;
     color: color-contrast($secondary);
 }
-
-.form-body {
-    padding: 0;
-    padding-top: 1rem;
-
-}
-
 .color-input {
     @extend .form-control !optional;
     padding: 0;
@@ -99,4 +91,8 @@ input[type=color] {
 input[type=number] {
     padding-inline-end: 2px;
     padding-inline-start: 6px;
+}
+
+input[type=color] {
+    width: 100%;
 }

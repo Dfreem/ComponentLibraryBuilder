@@ -122,4 +122,5 @@ public static class JSRuntimeExtensions
     {
         await js.InvokeVoidAsync("removeFromLocalStorage", key);
     }
+
 }

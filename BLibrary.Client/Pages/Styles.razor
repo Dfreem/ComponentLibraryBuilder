@@ -1,4 +1,6 @@
-﻿@page "/styles"
+﻿@page "/"
+@using Blibrary.Shared.Components.StylesForm
+@using Blibrary.Shared.Extensions.AppExtensions
 @using Blibrary.Shared.Models
 @using Blibrary.Shared.Services.CMSServices
 @using Microsoft.AspNetCore.Components.Sections
@@ -7,6 +9,7 @@
 @using Blibrary.Shared.Components.Card
 @using Blibrary.Shared.Components.DisplayComponentTemplates
 @inject IStyleVariablesService _variablesService
+@inject IJSRuntime _js
 @attribute [StreamRendering]
 
 @if (PreviewStyles is not null)
@@ -16,31 +19,53 @@
     </style>
 }
 
-<div class="container-flui">
+
+<div class="container-fluid">
     <div class="row">
         <div class="col">
             @if (CurrentTemplateType is not null)
             {
-                <DynamicComponent Type="CurrentTemplateType" Parameters="DynamicParms" />
+
+                if (CurrentTemplateType == typeof(ModalTemplate))
+                {
+                    <ModalTemplate @ref='TemplateModal' HasFooter Variables="Variables" />
+                }
+                else
+                {
+                    <DynamicComponent Type="CurrentTemplateType" Parameters="DynamicParams" />
+
+                }
             }
         </div>
     </div>
 </div>
-<div class="bottom-panel">
-    <StylesForm CurrentSection='CurrentSection' CurrentSectionChanged="UpdateCurrentSection" @bind-Variables='Variables' />
-</div>
+<StylesForm SelectedComponentType="GetFormType()" CurrentSection='CurrentSection' CurrentSectionChanged="UpdateCurrentSection" @bind-Variables='Variables'>
+    <ToolbarButtons>
+        @if (CurrentTemplateType == typeof(ModalTemplate))
+        {
+            <button class="btn btn-primary" @onclick='(() => TemplateModal?.Toggle())'>
+                Toggle Modal
+            </button>
+        }
+    </ToolbarButtons>
+</StylesForm>
 
 @code {
+
     public Dictionary<string, Type> ComponentTypes { get; set; } = new()
     {
        { "modal", typeof(ModalTemplate)},
        { "accordion", typeof(AccordionTemplate)},
-       { "card", typeof(CardTemplate)}
+       { "card", typeof(CardTemplate)},
+       {"btn", typeof(ButtonTemplate)}
     };
 
-    public Dictionary<string, Object> DynamicParms { get; set; } = [];
+    public ModalTemplate? TemplateModal { get; set; }
+
+    public Dictionary<string, Object> DynamicParams { get; set; } = [];
 
     public Type? CurrentTemplateType { get; set; }
+    public Type? CurrentFormType { get; set; }
 
     public List<ScssVariableSection> Variables { get; set; } = new();
 
@@ -52,15 +77,14 @@
     {
         // TODO change checkboxes when content changes
         CurrentSection = currentSection;
-        CurrentTemplateType = CurrentSection.SectionTitle switch
+        CurrentTemplateType = GetTemplateType();
+        if (CurrentTemplateType == typeof(ModalTemplate) && TemplateModal is null)
         {
-            var current when current.ToLower().Contains("modal") => ComponentTypes["modal"],
-            var current when current.ToLower().Contains("accordion") => ComponentTypes["accordion"],
-            var current when current.ToLower().Contains("card") => ComponentTypes["card"],
-            _ => null
-        };
+            TemplateModal = new();
+        }
 
-        PreviewStyles = await _variablesService.GenerateCssFromSection(CurrentSection);
+        PreviewStyles = currentSection.ToCssSection();
+
         Log.Information("Currently Editting \n{previewingRootSection}", PreviewStyles);
         await InvokeAsync(StateHasChanged);
     }
@@ -69,16 +93,53 @@
     {
         if (firstRender)
         {
-            var variables = await _variablesService.GetVariableCollectionAsync();
-            if (variables is not null)
-                Variables = variables.Where(v => !v.IsMap).ToList();
-
-            DynamicParms.Add("Variables", Variables);
-            CurrentSection = Variables.FirstOrDefault() ?? new();
-            StateHasChanged();
         }
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    public Type? GetTemplateType()
+    {
+        return CurrentSection.SectionTitle switch
+        {
+            var current when current.ToLower().Contains("modal") => ComponentTypes["modal"],
+            var current when current.ToLower().Contains("accordion") => ComponentTypes["accordion"],
+            var current when current.ToLower().Contains("btn") => ComponentTypes["btn"],
+            var current when current.ToLower().Contains("card") => ComponentTypes["card"],
+            _ => null
+        };
+    }
+
+    public Type GetFormType()
+    {
+        return CurrentSection.SectionTitle switch
+        {
+            var current when current.ToLower().Contains("btn") => typeof(ButtonFormContent),
+            _ => typeof(DefaultFormContent)
+        };
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var variables = await _variablesService.GetVariableCollectionAsync();
+        if (variables is not null)
+            Variables = variables.Where(v => !v.IsMap).ToList();
+
+        var colorSection = Variables.ColorSection()?.SelectMany(s => s.Rules).ToList() ?? [];
+        List<ScssVariable> selectedColors = CurrentSection?.ColorVariations ?? [];
+        CurrentSection = new() { SectionTitle = "" };
+        DynamicParams.Add("Variables", Variables);
+        DynamicParams.Add("ColorSection", colorSection);
+        DynamicParams.Add("SelectedColors", selectedColors);
+        DynamicParams.Add("SelectedColorsChanged", EventCallback.Factory.Create<List<ScssVariable>>(this, SelectColors));
+
+        await base.OnInitializedAsync();
+    }
+
+    public async Task SelectColors(List<ScssVariable> colors)
+    {
+        CurrentSection.ColorVariations = colors;
+        DynamicParams["SelectedColors"] = colors;
+        await InvokeAsync(StateHasChanged);
+    }
 }
 

@@ -1,13 +1,12 @@
 {
-  "version": "1.0",
+  "version": "3.0",
   "defaultProvider": "cdnjs",
   "libraries": [
     {
       "library": "bootstrap@5.3.3",
-      "destination": "wwwroot/bootstrap/",
+      "destination": "wwwroot/lib/bootstrap/",
       "files": [
         "js/bootstrap.bundle.min.js",
-        "css/bootstrap.css",
         "scss/forms/_floating-labels.scss",
         "scss/forms/_form-check.scss",
         "scss/forms/_form-control.scss",
@@ -99,7 +98,8 @@
         "scss/_type.scss",
         "scss/_utilities.scss",
         "scss/_variables-dark.scss",
-        "scss/_variables.scss"
+        "scss/_variables.scss",
+        "css/bootstrap.css"
       ]
     }
   ]
