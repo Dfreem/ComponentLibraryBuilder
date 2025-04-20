@@ -1,44 +1,31 @@
 ﻿@using Blibrary.Shared.Extensions
 @using Blibrary.Shared.Extensions.AppExtensions
 @using Blibrary.Shared.Models
+@using Blibrary.Shared.Services.CMSServices
 @using Wacton.Unicolour
-@implements IDisplayComponentTemplate
+@inject IColorVariantService _variantService
 
 <div class="container">
-    <div class="row mb-3">
-        <div class="col">
-            <h2> Available Button Colors </h2>
-            <div class="d-grid">
-                <div class="row">
-                    @foreach (var color in ColorSection)
+    <div class="row">
+        <h2> Available Button Colors </h2>
+        <div class="col-12">
+            <div class="d-flex w-100 justify-content-evenly">
+                @foreach (var color in _variantService.ColorSection)
+                {
+                    if (_variantService.CurrentSection.ColorVariations.Any(v => v.Key == color.Key))
                     {
-                        <div class="col-2 text-center mb-2">
-
-                            <button @key="@color.Value" @onclick="(() => AddColor(color))" class="btn text-nowrap" style="@ButtonStyle(color)">
-                                @color.Value
-                            </button>
-                        </div>
+                        <button class="btn text-nowrap disabled" @key="@color.Key" style="@ButtonStyle(color)">
+                            @color.Value
+                        </button>
                     }
-                </div>
-            </div>
-        </div>
+                    else
+                    {
 
-        <div class="col">
-            <div class="border-start border-2 border-secondary ps-3">
-
-                <h2>Selected Button Colors</h2>
-                <div class="d-grid">
-                    <div class="row">
-                        @foreach (var color in SelectedColors)
-                        {
-                            <div class="col-2 text-center mb-2">
-                                <button @key="@color.Value" @onclick="(() => RemoveColor(color))" class="btn text-nowrap" style="@ButtonStyle(color)">
-                                    @color.Value
-                                </button>
-                            </div>
-                        }
-                    </div>
-                </div>
+                        <button @key="@color.Value" @onclick="(() => AddColor(color))" class="btn text-nowrap" style="@ButtonStyle(color)">
+                            @color.Value
+                        </button>
+                    }
+                }
             </div>
         </div>
     </div>
@@ -52,18 +39,14 @@
     public EventCallback<List<ScssVariableSection>> VariablesChanged { get; set; }
 
     [Parameter]
-    public List<ScssVariable> ColorSection { get; set; } = [];
-
-    [Parameter]
-    public List<ScssVariable> SelectedColors { get; set; } = [];
-
-    [Parameter]
-    public EventCallback<List<ScssVariable>> SelectedColorsChanged { get; set; }
-
-    [Parameter]
     public EventCallback<(string Key, bool Value)> CheckRule { get; set; }
 
-  
+    protected override void OnInitialized()
+    {
+        _variantService.OnSelectionChanged += async (sender, args) => await InvokeAsync(StateHasChanged);
+        base.OnInitialized();
+    }
+
     protected string BgColorToTextColor(string hexColor)
     {
         Unicolour color = new(hexColor);
@@ -71,22 +54,14 @@
         return inverseColor.Hex;
     }
 
-    public async Task RemoveColor(ScssVariable color)
+    public void RemoveColor(ScssVariable color)
     {
-        SelectedColors.Remove(color);
-        ColorSection.Add(color);
-        await SelectedColorsChanged.InvokeAsync(SelectedColors);
-
+        _variantService.UnSelectColor(color);
     }
 
-    public async Task AddColor(ScssVariable color)
+    public void AddColor(ScssVariable color)
     {
-        if (SelectedColors.Any(c => c.Value == color.Value))
-            return;
-
-        SelectedColors.Add(color);
-        ColorSection.Remove(color);
-        await SelectedColorsChanged.InvokeAsync(SelectedColors);
+        _variantService.SelectColor(color);
     }
 
     private string ButtonStyle(ScssVariable color)

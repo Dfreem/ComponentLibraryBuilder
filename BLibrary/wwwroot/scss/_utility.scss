@@ -23,6 +23,18 @@
     .right-#{$i} {
         right: calc($i * 1vw) !important;
     }
+
+    .top-#{$i} {
+        top: calc($i * 1vh);
+    }
+
+    .bottom-#{$i} {
+        bottom:  calc($i * 1vh);
+    }
+
+    .vh-#{$i} {
+        height: calc($i * 1vh);
+    }
 }
 
 .size-container {

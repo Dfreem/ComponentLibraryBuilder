@@ -8,8 +8,9 @@
 @using Blibrary.Shared.Components.Accordion
 @using Blibrary.Shared.Components.Card
 @using Blibrary.Shared.Components.DisplayComponentTemplates
-@inject IStyleVariablesService _variablesService
+@inject IStyleVariablesService _styleService
 @inject IJSRuntime _js
+@inject IColorVariantService _variantService
 @attribute [StreamRendering]
 
 @if (PreviewStyles is not null)
@@ -57,7 +58,7 @@
        { "modal", typeof(ModalTemplate)},
        { "accordion", typeof(AccordionTemplate)},
        { "card", typeof(CardTemplate)},
-       {"btn", typeof(ButtonTemplate)}
+       {"buttons", typeof(ButtonTemplate)}
     };
 
     public ModalTemplate? TemplateModal { get; set; }
@@ -73,20 +74,18 @@
 
     public string? PreviewStyles { get; set; }
 
-    public async Task UpdateCurrentSection(ScssVariableSection currentSection)
+    protected override async Task OnInitializedAsync()
     {
-        // TODO change checkboxes when content changes
-        CurrentSection = currentSection;
-        CurrentTemplateType = GetTemplateType();
-        if (CurrentTemplateType == typeof(ModalTemplate) && TemplateModal is null)
-        {
-            TemplateModal = new();
-        }
+        var variables = await _styleService.GetVariableCollectionAsync();
+        var colorVars = variables?.ColorSectionVariables();
+        _variantService.ColorSection = colorVars ?? [];
 
-        PreviewStyles = currentSection.ToCssSection();
+        if (variables is not null)
+            Variables = variables.Where(v => !v.IsMap).ToList();
 
-        Log.Information("Currently Editting \n{previewingRootSection}", PreviewStyles);
-        await InvokeAsync(StateHasChanged);
+        DynamicParams.Add("Variables", Variables);
+
+        await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -103,7 +102,7 @@
         {
             var current when current.ToLower().Contains("modal") => ComponentTypes["modal"],
             var current when current.ToLower().Contains("accordion") => ComponentTypes["accordion"],
-            var current when current.ToLower().Contains("btn") => ComponentTypes["btn"],
+            var current when current.ToLower().Contains("buttons") => ComponentTypes["buttons"],
             var current when current.ToLower().Contains("card") => ComponentTypes["card"],
             _ => null
         };
@@ -113,33 +112,25 @@
     {
         return CurrentSection.SectionTitle switch
         {
-            var current when current.ToLower().Contains("btn") => typeof(ButtonFormContent),
+            var current when current.ToLower().Contains("buttons") => typeof(ButtonFormContent),
             _ => typeof(DefaultFormContent)
         };
     }
 
-    protected override async Task OnInitializedAsync()
+    public async Task UpdateCurrentSection(ScssVariableSection currentSection)
     {
-        var variables = await _variablesService.GetVariableCollectionAsync();
-        if (variables is not null)
-            Variables = variables.Where(v => !v.IsMap).ToList();
+        // TODO change checkboxes when content changes
+        CurrentSection = currentSection;
+        CurrentTemplateType = GetTemplateType();
+        if (CurrentTemplateType == typeof(ModalTemplate) && TemplateModal is null)
+        {
+            TemplateModal = new();
+        }
+        PreviewStyles = currentSection.ToCssSection();
 
-        var colorSection = Variables.ColorSection()?.SelectMany(s => s.Rules).ToList() ?? [];
-        List<ScssVariable> selectedColors = CurrentSection?.ColorVariations ?? [];
-        CurrentSection = new() { SectionTitle = "" };
-        DynamicParams.Add("Variables", Variables);
-        DynamicParams.Add("ColorSection", colorSection);
-        DynamicParams.Add("SelectedColors", selectedColors);
-        DynamicParams.Add("SelectedColorsChanged", EventCallback.Factory.Create<List<ScssVariable>>(this, SelectColors));
-
-        await base.OnInitializedAsync();
-    }
-
-    public async Task SelectColors(List<ScssVariable> colors)
-    {
-        CurrentSection.ColorVariations = colors;
-        DynamicParams["SelectedColors"] = colors;
+        Log.Information("Currently Editting \n{previewingRootSection}", PreviewStyles);
         await InvokeAsync(StateHasChanged);
     }
+
 }
 

@@ -1,4 +1,5 @@
 
+using Blibrary.Shared.Extensions.AppExtensions;
 using Blibrary.Shared.Services.CMSServices;
 using Blibrary.Shared.Services.ToastService;
 
@@ -13,6 +14,8 @@ builder.Services.AddTransient<HttpClient>(sp =>
     return sp.GetRequiredService<IHttpClientFactory>().CreateClient("default");
 });
 builder.Services.AddScoped<IStyleVariablesService,StyleVariablesService>();
+builder.Services.AddCommonServices();
+
 builder.Services.AddToast(options =>
 {
     options.Position = ToastPosition.Top | ToastPosition.Right;

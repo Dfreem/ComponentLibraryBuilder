@@ -17,6 +17,11 @@
                 {
                     <input class="form-control" type="range" value="@Rule.Value" @oninput="SetRuleValue" />
                 }
+                else
+                {
+                    <input class="form-control" type="range" value="@Rule.Value" disabled="disabled" />
+
+                }
             }
             else
             {
@@ -24,7 +29,14 @@
                 {
                     <label class="input-group-text">@Step</label>
                 }
-                <input type="number" step="@Step" class="form-control" value="@Rule.Value" @oninput="SetRuleValue" />
+                @if (!Disabled)
+                {
+                    <input type="number" step="@Step" class="form-control" value="@Rule.Value" @oninput="SetRuleValue" />
+                }
+                else
+                {
+                    <input type="number" disabled="disabled" step="@Step" class="form-control" value="@Rule.Value"  />
+                }
             }
             <div class="fit-width">
                 @if (!Disabled)
@@ -39,7 +51,7 @@
                 else
                 {
 
-                    <select class="form-select" value="@Rule.Unit" disabled>
+                    <select class="form-select" value="@Rule.Unit" disabled="disabled">
                         @foreach (var item in Enum.GetValues<ScssSizeUnit>())
                         {
                             <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>

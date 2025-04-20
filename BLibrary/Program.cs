@@ -7,6 +7,7 @@ using Blibrary.Shared.Services;
 using Blibrary.Services;
 using Blibrary.Shared.Services.CMSServices;
 using Blibrary.Shared.Services.ToastService;
+using Blibrary.Shared.Extensions.AppExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,7 @@ builder.Services.AddToast(options =>
 builder.Services.AddSassCompilerCore();
 builder.Services.AddTransient<BootstrapStyleService>();
 builder.Services.AddScoped<IStyleVariablesService, StyleVariablesService>();
+builder.Services.AddCommonServices();
 //builder.Services.AddDnsSrvServiceEndpointProvider();
 
 var app = builder.Build();

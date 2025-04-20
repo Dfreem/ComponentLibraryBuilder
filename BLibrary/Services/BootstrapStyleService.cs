@@ -27,9 +27,7 @@ public class BootstrapStyleService
         "bootstrap-utilities"
         ];
 
-    private string[] _include = [
-        "modal",
-        "accordion",
+    private string[] _hasVariants = [
         "btn"
         ];
 
@@ -49,6 +47,7 @@ public class BootstrapStyleService
             var templateFiles = Directory.GetFiles("wwwroot/scss/components/templates/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
             var sections = scssSectionGrabber.Matches(bootstrapScssVariables);
 
+            // get individual bootstrap components
             foreach (var item in templateFiles)
             {
                 try
@@ -59,6 +58,7 @@ public class BootstrapStyleService
                     //var bsFiles = Directory.GetFiles("wwwroot/bootstrap/scss/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
                     var fileStyle = await File.ReadAllTextAsync(Path.GetFullPath($"./wwwroot/scss/components/templates/_{item}.scss"));
                     ScssVariableSection section = new(fileStyle, item);
+                    section.HasVariants = _hasVariants.Contains(item);
                     if (section.Rules.Count == 0)
                         continue;
                     results.Add(section);
@@ -69,17 +69,42 @@ public class BootstrapStyleService
                 }
             }
 
-            // theme color variables for populating color dropdown by variable name
-            var colorSections = sections.Where(s => s.Success && s.Groups.Count > 1 && s.Groups[0].Value.Contains("color-variables"));
-            ScssVariableSection themeColorVariables = new() { SectionTitle = "color-variables" };
-            foreach (var colorVartiablesSection in colorSections)
+            // theme color variables for populating color dropdown by name and generating color variants
+            Match? colorSection = null;
+            foreach (Match section in sections)
             {
-                var sectionTitle = titleGrabber.Match(colorVartiablesSection.Value);
+                if(!section.Success || section.Groups.Count <= 1)
+                    continue;
+
+                // sections start with `// scss-docs-start {section title}
+                var sectionContent = section.Groups[0].Value;
+                var titleMatch = titleGrabber.Match(sectionContent);
+
+                // title-grabber grabs the entire line, ex: // scss-docs-start color-variables -> ["//", "scss-docs-start", "color-vartiables"]
+                var titleParts = titleMatch.Groups[0].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var title = titleParts[^1];
+                if(title == "color-variables")
+                {
+                    colorSection = section;
+                    break;
+                }
+            }
+
+            ScssVariableSection themeColorVariables = new() { SectionTitle = "color-variables" };
+            // extract color variables
+            if (colorSection is not null)
+            {
+                var sectionTitle = titleGrabber.Match(colorSection.Value);
                 var scssRuleGrabber = ScssRegexHelper.ScssRuleGrabber();
-                var rules = scssRuleGrabber.Matches(colorVartiablesSection.Value);
-                var ruleList = rules.Where(r => r.Success && !r.Groups[1].Value.Contains("zindex") && r.Groups[2].Value.ScssIsColor()) // ignore z-index variables
+                var rules = scssRuleGrabber.Matches(colorSection.Value);
+                var ruleList = rules.Where(
+                    r => r.Success && 
+                    !r.Groups[1].Value.Contains("zindex") && // ignore z-index variables
+                    r.Groups[2].Value.ScssIsColor())
                     .Select(r =>
                     {
+                        // Regex.Match includes the entire match in the first position of the array and then the captured groups
+                        // if there are less then 3 groups, the match didn't work
                         string value = r.Groups.Count > 2 ? r.Groups[2].Value.Replace("!default", "").Trim() : "";
                         string noHashtag = value.Replace("#", "");
                         if (noHashtag.Length <= 3)
@@ -94,9 +119,9 @@ public class BootstrapStyleService
                         };
                     }).DistinctBy(r => r.Key);
 
-                themeColorVariables.Rules.AddRange(ruleList);
+                themeColorVariables.Rules = [.. ruleList];
+                results.Add(themeColorVariables);
             }
-            results.Add(themeColorVariables);
 
         }
         catch (Exception ex)

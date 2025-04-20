@@ -13,6 +13,7 @@ using Blibrary.Services;
 using Blibrary.Shared.Models;
 using AspNetCore.SassCompiler;
 using System.Text;
+using Blibrary.Shared.Extensions.AppExtensions;
 
 namespace Blibrary.Controllers;
 
@@ -65,7 +66,9 @@ public partial class FileContentController : ControllerBase
         string scssPath = String.Empty;
         string result = "";
 
+        sections.ColorSectionVariables();
         Regex importsGrabber = ScssRegexHelper.ScssImportsGrabber();
+
 
         string fileContents = "";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_functions.scss") + "\n\n";
@@ -76,8 +79,16 @@ public partial class FileContentController : ControllerBase
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_utilities.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/vendor/_rfs.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_root.scss") + "\n\n";
+        //fileContents = fileContents.Replace("@import \"variables-dark\";", "");
         foreach (var section in sections.Where(s => s.Rules.Any(r => r.IsChecked)))
         {
+            if (section.HasVariants)
+            {
+                var (fileThemeVariables, fileThemeMap) = ProcessThemeColors(section.ColorVariations);
+                fileContents += fileThemeVariables;
+                fileContents += fileThemeMap;
+            }
+            fileContents += System.IO.File.ReadAllText($"./wwwroot/lib/bootstrap/scss/_{section.SectionTitle}.scss") + "\n\n";
             fileContents += section.ToScssSection() + "\n";
             string sectionTitle = section.SectionTitle;
             if (_replacements.ContainsKey(section.SectionTitle))
@@ -85,7 +96,7 @@ public partial class FileContentController : ControllerBase
             if (_ignores.Contains(section.SectionTitle))
                 continue;
 
-            fileContents += System.IO.File.ReadAllText($"./wwwroot/lib/bootstrap/scss/_{sectionTitle}.scss") + "\n";
+            fileContents += section.EndOfFile;
 
         }
         try
@@ -99,39 +110,25 @@ public partial class FileContentController : ControllerBase
             using var stream = new MemoryStream(buffer);
             result = await _sassCompiler.CompileToStringAsync(stream, [
                 "--quiet", "--quiet-deps",
+                "--load-path=./wwwroot/lib/bootstrap/scss/vendor",
                 "--load-path=./wwwroot/lib/bootstrap/scss/mixins",
-                "--load-path=./wwwroot/lib/bootstrap/scss/",
+                "--load-path=./wwwroot/lib/bootstrap/scss",
                 "--load-path=./wwwroot/lib/bootstrap/scss/helpers",
                 "--load-path=./wwwroot/lib/bootstrap/scss/utilities",
                 "--load-path=./wwwroot/lib/bootstrap/scss/forms"
             ]);
-        }
-        catch (Exception ex)
-        {
-            Log.Error("Error while compiling sass\n{ex}", ex);
-        }
-        finally
-        {
             if (!String.IsNullOrEmpty(scssPath) && System.IO.File.Exists(scssPath))
                 System.IO.File.Delete(scssPath);
             if (System.IO.File.Exists("./wwwroot/temp/css.custom.css"))
                 System.IO.File.Delete("./wwwroot/temp/css.custom.css");
         }
+        catch (Exception ex)
+        {
+            Log.Error("Error while compiling sass\n{ex}", ex);
+        }
 
         //using Stream stream = System.IO.File.Create();
         return result;
-    }
-
-    private string ValueReplace(string value)
-    {
-        if (value.Contains("#{$"))
-            value = value.Replace("#{$", "var(--").Replace("}", ");");
-        else
-            value = "";
-        //else if (value.StartsWith("#{"))
-        //    value = value.Replace("#{", "var(--").Replace("}", ");");
-
-        return value;
     }
 
     /// <summary>
@@ -144,4 +141,17 @@ public partial class FileContentController : ControllerBase
     [HttpGet("bootstrapVariables")]
     public async Task<List<ScssVariableSection>> GetBootstrapVariables() => await _bootstrapStyleService.GetBaseVariablesAsync();
 
+    private (string themeColorVariables, string themeColorMap) ProcessThemeColors(List<ScssVariable> colors)
+    {
+        string themeColorVariables = "";
+        string themeColorMap = "$theme-colors: map-merge-multiple(";
+        foreach (ScssVariable color in colors)
+        {
+            themeColorVariables += $"${color.Key}: {color.Value};\n";
+            themeColorMap += $"${color.Key}s, ";
+        }
+        themeColorMap = themeColorMap.Remove(themeColorMap.LastIndexOf(','), 1);
+        themeColorMap += ");\n";
+        return (themeColorVariables, themeColorMap);
+    }
 }

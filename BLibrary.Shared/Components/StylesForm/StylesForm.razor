@@ -10,6 +10,7 @@
 @inject IJSRuntime _js
 @inject IToastService _toast
 @inject IStyleVariablesService _styleService
+@inject IColorVariantService _variantService
 
 <div class="form-container bottom-panel">
     <div class="form-header">
@@ -85,25 +86,25 @@
     protected override async Task OnInitializedAsync()
     {
         DynamicMetadata = new()
-            {
-                ["CheckRule"] = EventCallback.Factory.Create<(string Key, bool Value)>(this, CheckRule),
-                ["SetRuleValue"] = EventCallback.Factory.Create<(string Key, string Value)>(this, SetRuleValue),
-                ["CheckOptionsBox"] = EventCallback.Factory.Create<string>(this, CheckOptionBox),
-                ["CurrentSection"] = CurrentSection,
-                ["Variables"] = Variables,
-            };
+        {
+            ["CheckRule"] = EventCallback.Factory.Create<(string Key, bool Value)>(this, CheckRule),
+            ["SetRuleValue"] = EventCallback.Factory.Create<(string Key, string Value)>(this, SetRuleValue),
+            ["CheckOptionsBox"] = EventCallback.Factory.Create<string>(this, CheckOptionBox),
+            ["CurrentSection"] = CurrentSection,
+            ["Variables"] = Variables,
+        };
         await base.OnInitializedAsync();
-    }
-
-    public async Task SelectColor(List<ScssVariable> colors)
-    {
-        CurrentSection.ColorVariations = colors;
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task SelectSection(ChangeEventArgs args)
     {
         var sectionTitle = args.Value?.ToString();
+        if (CurrentSection.HasVariants && !String.IsNullOrEmpty(sectionTitle))
+        {
+            // will save current section colors to services backing store
+            _variantService.SwitchComponent(CurrentSection.SectionTitle);
+        }
+
         CurrentSection = Variables.FirstOrDefault(s => s.SectionTitle == sectionTitle) ?? new();
         DynamicMetadata["CurrentSection"] = CurrentSection;
         await CurrentSectionChanged.InvokeAsync(CurrentSection);
@@ -180,5 +181,12 @@
         }
         rule.IsChecked = !rule.IsChecked;
         rule.Value = rule.IsChecked.ToString().ToLower();
+    }
+
+    public async Task RemoveVariant(string colorKey)
+    {
+        CurrentSection.ColorVariations.RemoveAll(c => c.Key == colorKey);
+        DynamicMetadata["CurrentSection"] = CurrentSection;
+        await CurrentSectionChanged.InvokeAsync(CurrentSection);
     }
 }

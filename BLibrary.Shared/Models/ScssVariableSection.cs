@@ -15,25 +15,35 @@ using System.Threading.Tasks;
 namespace Blibrary.Shared.Models;
 public partial class ScssVariableSection
 {
+    private Dictionary<string, string> _nameMap = new()
+    {
+        ["buttons"] = "btn",
+        ["modal"] = "modal",
+        ["accordion"] = "accordion"
+    };
+
+    private Dictionary<string, List<string>> _removeRules = new()
+    {
+        ["buttons"] = [
+            "btn-bg",
+            "btn-color",
+            ]
+    };
+
+    public string EndOfFile { get; set; } = "";
+
     public string SectionTitle { get; set; } = "";
 
     // TODO parse and set this on instantiation
     public ComponentType SectionType { get; set; }
-
-    public Type GetComponentType()
-    {
-        return SectionTitle switch
-        {
-            "btn" => typeof(ButtonTemplate),
-            _ => typeof(DefaultFormContent)
-        };
-    }
 
     public bool IsMap { get; set; }
 
     public List<ScssVariable> Rules { get; set; } = [];
 
     public List<ScssVariable> ColorVariations { get; set; } = [];
+
+    public bool HasVariants { get; set; }
 
     public List<ScssVariable> NonEditableRules { get; set; } = [];
 
@@ -46,35 +56,31 @@ public partial class ScssVariableSection
         string result = $" // scss-docs-start {SectionTitle} \n";
         foreach (var rule in Rules.Where(r => r.IsChecked))
         {
-            result += $"${rule.Key}: {rule.Value};\n";
+            result += $"${_nameMap[rule.Key]}: {rule.Value};\n";
         }
         result += $" // scss-docs-end {SectionTitle}\n\n";
         return result;
     }
 
-    public string ToCssSection(bool includeRules = true)
+    public string ToCssSection(bool useOriginal = true)
     {
 
         if (!Rules.Any(r => r.IsChecked))
         {
             return "";
         }
-        string result = $".{SectionTitle} {{\n";
+        string result = $".{_nameMap[SectionTitle]} {{\n";
         foreach (var rule in Rules.Where(r => r.IsChecked))
         {
             result += $"{rule.ToCss()}\n";
         }
         result += "\n";
 
-        if (!includeRules)
+        if (!useOriginal)
             return result;
 
+        result += EndOfFile;
 
-        foreach (var rule in NonEditableRules)
-        {
-            result += $"\t{rule.ToCss()}\n";
-        }
-        result += "}\n";
         return result;
     }
 
@@ -108,14 +114,14 @@ public partial class ScssVariableSection
     public ScssVariableSection(string sectionString, string sectionName)
     {
         SectionTitle = sectionName;
-        ProcessCssSection(sectionString);
+        ProcessCssSection(sectionString, true);
 
     }
 
 
-    private void ProcessCssSection(string sectionString, bool preserverRules = false)
+    private void ProcessCssSection(string sectionString, bool preserverRules = true)
     {
-        string pattern = $"\\.{SectionTitle}" + @"-?\w*\W*{([^}])*}";
+        string pattern = $"\\.{_nameMap[SectionTitle]}" + @"-?\w*\W*{([^}])*}";
         Regex sectionGrabber = new(pattern);
         var sectionMatch = sectionGrabber.Match(sectionString);
         if (!sectionMatch.Success)
@@ -128,16 +134,19 @@ public partial class ScssVariableSection
             Rules.Clear();
 
         Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
+        //Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
         var rules = ruleGrabber.Matches(sectionMatch.Value);
-        NonEditableRules = rules.Where(r => !r.Groups[1].Value.Trim().StartsWith("--"))
-            .Select(r => new ScssVariable()
-            {
-                Key = r.Groups[1].Value.Trim(),
-                Original = r.Groups[2].Value.Trim(),
-                Value = r.Groups[2].Value.Trim(),
-                IsVariable = false
-            })
-            .ToList();
+        var lines = sectionString.Split('\n', StringSplitOptions.RemoveEmptyEntries).Where(s => !s.StartsWith("--"));
+        EndOfFile = String.Join('\n', lines);
+        //NonEditableRules = rules.Where(r => !r.Groups[1].Value.Trim().StartsWith("--"))
+        //    .Select(r => new ScssVariable()
+        //    {
+        //        Key = r.Groups[1].Value.Trim(),
+        //        Original = r.Groups[2].Value.Trim(),
+        //        Value = r.Groups[2].Value.Trim(),
+        //        IsVariable = false
+        //    })
+        //    .ToList();
 
         var ruleList = rules.Where(r => r.Success && !r.Groups[1].Value.Contains("zindex") && !NonEditableRules.Any(s => s.Key == r.Groups[1].Value.Trim())) // ignore z-index variables
             .Select(r => new ScssVariable()
@@ -146,7 +155,8 @@ public partial class ScssVariableSection
                 Original = r.Groups[1].Value.Trim(),
                 IsVariable = true,
                 Value = r.Groups.Count > 2 ? r.Groups[2].Value.Trim() : ""
-            }).DistinctBy(r => r.Key);
+            });
+        ruleList = ruleList.Where(r => !_removeRules.ContainsKey(SectionTitle) || !_removeRules[SectionTitle].Contains(r.Key));
         Rules.AddRange(ruleList);
 
         // as a dictionary does, we don't want any duplicate keys TODO be smarter about keeping the new item

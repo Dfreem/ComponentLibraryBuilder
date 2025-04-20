@@ -1,9 +1,56 @@
 ﻿@using Blibrary.Shared.Extensions
 @using Blibrary.Shared.Models
 
+<div class="d-flex flex-nowrap align-items-center mb-1">
+    <div class="col">
+
+        @if (Rule.InputType() != "checkbox")
+        {
+
+            <div class="form-check mx-2">
+                <label class="form-check-label mx-2">@Rule.Key.KabobToTitleCase()</label>
+                <input class="form-check-input" type="checkbox" checked="@IsChecked" @onchange="(async (v) => await CheckboxCheck(Rule.Key, Convert.ToBoolean(v.Value)))" />
+            </div>
+        }
+    </div>
+    <div class="col">
+        @switch (Rule.InputType())
+        {
+            case var multi when multi.Contains("multi"):
+                <ShadowInput Disabled="!IsChecked" @key='Rule.Key' NumberOfUnits="MultiInputSectionTotal()" Rule="@Rule" RuleChanged="(async (r) => await SetRuleValue.InvokeAsync((r.Key, r.Value)))" />
+                break;
+            case ("number"):
+                <NumberUnitInput @key='Rule.Key' Disabled="!IsChecked" Rule="Rule" RuleChanged='(async (a) => await SetRuleValue.InvokeAsync((Rule.Key, a.Value?.ToString() ?? "")))' />
+                break;
+            case ("color"):
+                <ColorInput @key='Rule.Key'
+                            Disabled="!IsChecked"
+                            ColorVariableDropdown="ColorSection"
+                            Rule="Rule"
+                            RuleChanged="(async (r) => await SetRuleValue.InvokeAsync((r.Key, r.Value)))"></ColorInput>
+                break;
+            default:
+                if (IsChecked)
+                {
+                    <input class="form-control" @oninput='(async (args) => await SetRuleValue.InvokeAsync((Rule.Key, $"{args.Value}")))' value="@Rule.Value" />
+                }
+                else
+                {
+                    <input class="form-control" disabled="disabled" value="@Rule.Value" />
+                    
+                }
+                break;
+
+        }
+    </div>
+</div>
+
 @code {
     [Parameter, EditorRequired]
     public required ScssVariable Rule { get; set; }
+
+    [Parameter]
+    public List<ScssVariable> ColorSection { get; set; } = [];
 
     [Parameter]
     public EventCallback<ScssVariable> RuleChanged { get; set; }
@@ -32,4 +79,5 @@
         Rule.IsChecked = value;
     }
 
+    private int MultiInputSectionTotal() => Convert.ToInt32(Rule.InputType().Replace("multi-", "").Trim());
 }

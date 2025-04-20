@@ -1,4 +1,7 @@
 ﻿using Blibrary.Shared.Models;
+using Blibrary.Shared.Services.CMSServices;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using System;
 using System.Collections.Generic;
@@ -7,6 +10,21 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Blibrary.Shared.Extensions.AppExtensions;
+
+public static class ServiceProviderExtensioins
+{
+    public static IServiceCollection AddCommonServices(this IServiceCollection services)
+    {
+        services.AddSingleton<IColorVariantService, ColorVariantService>(sp =>
+        {
+            using var scope = sp.CreateScope();
+            ColorVariantService service = new();
+            return service;
+        });
+
+        return services;
+    }
+}
 
 public static class SectionListExtensions
 {
@@ -32,10 +50,16 @@ public static class SectionListExtensions
     }
 
 
-    public static List<ScssVariableSection>? ColorSection(this List<ScssVariableSection> sections)
+    public static List<ScssVariableSection>? GetAllColorSections(this List<ScssVariableSection> sections)
     {
 
         return sections.Where(v => v.SectionTitle.Contains("color-variables")).ToList();
 
+    }
+
+    public static List<ScssVariable>? ColorSectionVariables(this List<ScssVariableSection> sections)
+    {
+        var colorSection = sections.FirstOrDefault(s => s.SectionTitle == "color-variables");
+        return colorSection?.Rules;
     }
 }
