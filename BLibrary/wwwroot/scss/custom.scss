@@ -16,6 +16,7 @@ $theme-colors: map-merge-multiple($theme-colors, $all-colors, ("primary": $prima
 @import "../lib/bootstrap/scss/accordion";
 @import "../lib/bootstrap/scss/modal";
 @import "../lib/bootstrap/scss/buttons";
+@import "../lib/bootstrap/scss/card";
 
 @import "scroll";
 

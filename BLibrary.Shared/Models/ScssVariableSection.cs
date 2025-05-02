@@ -19,6 +19,7 @@ public partial class ScssVariableSection
     {
         ["buttons"] = "btn",
         ["modal"] = "modal",
+        ["card"] = "card",
         ["accordion"] = "accordion"
     };
 
@@ -34,8 +35,7 @@ public partial class ScssVariableSection
 
     public string SectionTitle { get; set; } = "";
 
-    // TODO parse and set this on instantiation
-    public ComponentType SectionType { get; set; }
+    public bool Compile { get; set; }
 
     public bool IsMap { get; set; }
 
@@ -45,6 +45,8 @@ public partial class ScssVariableSection
 
     public bool HasVariants { get; set; }
 
+    // TODO probably get rid of these
+    public ComponentType SectionType { get; set; }
     public List<ScssVariable> NonEditableRules { get; set; } = [];
 
     /// <summary>
@@ -91,7 +93,7 @@ public partial class ScssVariableSection
         {
             return "";
         }
-        string result = "";
+        string result = $".{_nameMap[SectionTitle]} {{\n";
         foreach (var rule in Rules.Where(r => r.IsChecked))
         {
             result += $"{rule.ToScss()};\n";
@@ -136,8 +138,16 @@ public partial class ScssVariableSection
         Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
         //Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
         var rules = ruleGrabber.Matches(sectionMatch.Value);
-        var lines = sectionString.Split('\n', StringSplitOptions.RemoveEmptyEntries).Where(s => !s.StartsWith("--"));
-        EndOfFile = String.Join('\n', lines);
+        var lines = sectionString.Split('\n', StringSplitOptions.TrimEntries).ToList();
+        //.Where(s => !s.StartsWith("--"))
+        var lastVar = lines.LastOrDefault(l => l.StartsWith("--"));
+        if (!String.IsNullOrEmpty(lastVar))
+        {
+            var lastVarIndex = lines.IndexOf(lastVar);
+            lines = lines[lastVarIndex..];
+            EndOfFile = String.Join('\n', lines);
+        }
+
         //NonEditableRules = rules.Where(r => !r.Groups[1].Value.Trim().StartsWith("--"))
         //    .Select(r => new ScssVariable()
         //    {

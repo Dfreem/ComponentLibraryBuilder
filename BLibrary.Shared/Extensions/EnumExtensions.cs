@@ -27,8 +27,8 @@ public static class EnumExtensions
     public static string KabobToTitleCase(this string kabob)
     {
         var words = kabob.Trim().Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if(words.Length <= 1)
-            return words[0]??"";
+        if (words.Length <= 1)
+            return words[0] ?? "";
         for (int i = 0; i < words.Length; i++)
         {
             words[i] = $"{char.ToUpper(words[i][0])}{words[i][1..]}";
@@ -38,9 +38,14 @@ public static class EnumExtensions
 
     public static string Kabobify<T>(this T value) where T : struct, Enum
     {
-        var stringValue = Enum.GetName(value);
-        for (int i = 0; i < stringValue?.Length; i++)
+        string stringValue = Enum.GetName(value) ?? "";
+
+        for (int i = 0; i < stringValue.Length; i++)
         {
+            if (char.IsNumber(stringValue[i]) && i + 1 < stringValue.Length && !char.IsNumber(stringValue[i - 1]) && stringValue[i-1] != '-')
+            {
+                stringValue = stringValue.Replace(stringValue[i].ToString(), $"-{stringValue[i]}");
+            }
             if (char.IsUpper(stringValue[i]))
             {
                 if (i == 0)

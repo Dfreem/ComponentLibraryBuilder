@@ -2,30 +2,31 @@
 @using Blibrary.Shared.Components.Card
 @implements IDisplayComponentTemplate
 
-<Card>
-    <CardHeader>
-        Card Header
-    </CardHeader>
-    <CardTitle>
-        Card Title
-    </CardTitle>
-    <CardBody>
-        Card Body
-    </CardBody>
-    <CardFooter>
-        Card Footer
-    </CardFooter>
-</Card>
+<div class="container">
+    <div class="row">
+        <div class="d-grid position-absolute top-15 right-10 col-4">
+            <Card >
+                <CardHeader>
+                    Card Header
+                </CardHeader>
+                <CardTitle>
+                    Card Title
+                </CardTitle>
+                <CardBody>
+                    Card Body
+                </CardBody>
+                <CardFooter>
+                    Card Footer
+                </CardFooter>
+            </Card>
+
+        </div>
+    </div>
+</div>
 
 @code {
     [Parameter]
-    public List<ScssVariableSection> Variables { get; set; } = [];
+    public ScssVariableSection CurrentSection { get; set; } = default!;
     [Parameter]
     public List<ScssVariable> ColorSection { get; set; } = [];
-
-    [Parameter]
-    public List<ScssVariable> SelectedColors { get; set; } = [];
-
-    [Parameter]
-    public EventCallback<List<ScssVariable>> SelectedColorsChanged { get; set; }
 }

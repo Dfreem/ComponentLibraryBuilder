@@ -15,8 +15,5 @@ internal interface IDisplayComponentTemplate
 
     public List<ScssVariable> ColorSection { get; set; }
 
-    public List<ScssVariable> SelectedColors { get; set; }
-
-    public EventCallback<List<ScssVariable>> SelectedColorsChanged { get; set; }
-    List<ScssVariableSection> Variables { get; set; }
+    ScssVariableSection CurrentSection { get; set; }
 }

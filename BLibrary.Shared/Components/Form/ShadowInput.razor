@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Blibrary.Shared.Enums
 @using Blibrary.Shared.Helpers
-@inherits InputBase
+@inherits InputBase<string>
 
 <div class=" d-flex shadow-input">
     <div class="input-group">
@@ -11,9 +11,14 @@
         @for (int i = 0; i < NumberOfUnits; i++)
         {
             int currentIndex = i;
-            <input disabled="@(!Rule.IsChecked)" @key='@(currentIndex.ToString() + "-number")' type="number" class="form-control" value="@_unitSections[currentIndex]" @oninput='(async (v) => await SetRuleValue(currentIndex, v.Value?.ToString() ?? ""))' />
+            <input disabled="@(Disabled)"
+                   @key='@(currentIndex.ToString() + "-number")'
+                   type="number"
+                   class="form-control"
+                   value="@_unitSections[currentIndex]"
+                   @oninput='(async (v) => await SetRuleValue(currentIndex, v.Value?.ToString() ?? ""))' />
         }
-        <input disabled="@(!Rule.IsChecked)" type="color" value="@_color" @key="@(NumberOfUnits + "-color")" @oninput='(async (args) => await SetColorSection(args.Value?.ToString() ?? ""))' class="@(Class + " form-control-color w-100")" />
+        <input disabled="@(Disabled)" type="color" value="@_color" @key="@(NumberOfUnits + "-color")" @oninput='(async (args) => await SetColorSection(args.Value?.ToString() ?? ""))' class="@(Class + " form-control-color w-100")" />
 
     </div>
 </div>
@@ -43,15 +48,15 @@
     private async Task SetRuleValue(int index, string value)
     {
         _unitSections[index] = value;
-        Rule.Value = BuildRuleValue();
-        await RuleChanged.InvokeAsync(Rule);
+        Value = BuildRuleValue();
+        await ValueChanged.InvokeAsync(Value);
     }
 
     private async Task SetColorSection(string value)
     {
         _color = value;
-        Rule.Value = BuildRuleValue();
-        await RuleChanged.InvokeAsync(Rule);
+        Value = BuildRuleValue();
+        await ValueChanged.InvokeAsync(Value);
     }
 
     private string BuildRuleValue()

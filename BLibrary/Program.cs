@@ -7,7 +7,7 @@ using Blibrary.Shared.Services;
 using Blibrary.Services;
 using Blibrary.Shared.Services.CMSServices;
 using Blibrary.Shared.Services.ToastService;
-using Blibrary.Shared.Extensions.AppExtensions;
+using Blibrary.Shared.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +24,7 @@ builder.Logging.AddSerilog(logger);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
-builder.Services.AddHttpClient();
-builder.Services.AddScoped(sp => new HttpClient() { BaseAddress = new Uri(builder.Configuration["BaseUrl"] ?? "") });
+builder.Services.AddCommonServices(new Uri(builder.Configuration["BaseUrl"] ?? ""));
 builder.Services.AddControllers();
 builder.Services.AddToast(options =>
 {
@@ -35,8 +34,6 @@ builder.Services.AddToast(options =>
 
 builder.Services.AddSassCompilerCore();
 builder.Services.AddTransient<BootstrapStyleService>();
-builder.Services.AddScoped<IStyleVariablesService, StyleVariablesService>();
-builder.Services.AddCommonServices();
 //builder.Services.AddDnsSrvServiceEndpointProvider();
 
 var app = builder.Build();

@@ -1,4 +1,5 @@
 ﻿using Blibrary.Shared.Enums;
+using Blibrary.Shared.Enums.Style;
 
 using Microsoft.AspNetCore.Components;
 
@@ -14,5 +15,8 @@ public class StyleableBaseComponent : ComponentBase
 
     [Parameter]
     public BootstrapColor? BgColor { get; set; }
+
+    [Parameter]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
 }

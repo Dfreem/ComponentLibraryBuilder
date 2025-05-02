@@ -1,16 +1,15 @@
-﻿@using Blibrary.Client.Shared.Components.StylesForm
-@using Blibrary.Shared.Extensions
-@using Blibrary.Shared.Extensions.AppExtensions
+﻿@using Blibrary.Shared.Extensions
 @using Blibrary.Shared.Models
 @using Blibrary.Shared.Services.CMSServices
 @using Blibrary.Shared.Services.ToastService
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.Extensions.Logging
+@using System.Diagnostics
 @inject ILogger<StylesForm> _logger
 @inject IJSRuntime _js
 @inject IToastService _toast
-@inject IStyleVariablesService _styleService
-@inject IColorVariantService _variantService
+@inject ISassCompilationService _styleService
+@inject SassClient _sassClient
 
 <div class="form-container bottom-panel">
     <div class="form-header">
@@ -27,7 +26,7 @@
                 </div>
                 <select value="@CurrentSection.SectionTitle" @onchange="(async(v) => await SelectSection(v))" class="form-select">
                     <option value="">Select a Section</option>
-                    @foreach (var varSection in Variables)
+                    @foreach (var varSection in Sections)
                     {
                         <option value="@varSection.SectionTitle">@varSection.SectionTitle</option>
                     }
@@ -61,10 +60,10 @@
 <FileDownloader @ref='_fileDownloader'></FileDownloader>
 @code {
     [Parameter]
-    public List<ScssVariableSection> Variables { get; set; } = new();
+    public List<ScssVariableSection> Sections { get; set; } = new();
 
     [Parameter]
-    public EventCallback<List<ScssVariableSection>> VariablesChanged { get; set; }
+    public EventCallback<List<ScssVariableSection>> SectionsChanged { get; set; }
 
     [Parameter]
     public ScssVariableSection CurrentSection { get; set; } = new() { SectionTitle = "" };
@@ -77,38 +76,31 @@
 
     public Dictionary<string, Object> DynamicMetadata { get; set; } = [];
 
-    [Parameter]
     public Type? SelectedComponentType { get; set; } = typeof(DefaultFormContent);
 
 
     FileDownloader _fileDownloader = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         DynamicMetadata = new()
         {
             ["CheckRule"] = EventCallback.Factory.Create<(string Key, bool Value)>(this, CheckRule),
             ["SetRuleValue"] = EventCallback.Factory.Create<(string Key, string Value)>(this, SetRuleValue),
+            ["SetUnitValue"] = EventCallback.Factory.Create<(string Key, string Value)>(this, SetUnitValue),
             ["CheckOptionsBox"] = EventCallback.Factory.Create<string>(this, CheckOptionBox),
+            ["AllSections"] = Sections,
             ["CurrentSection"] = CurrentSection,
-            ["Variables"] = Variables,
         };
-        await base.OnInitializedAsync();
+        await base.OnParametersSetAsync();
     }
 
     private async Task SelectSection(ChangeEventArgs args)
     {
         var sectionTitle = args.Value?.ToString();
-        if (CurrentSection.HasVariants && !String.IsNullOrEmpty(sectionTitle))
-        {
-            // will save current section colors to services backing store
-            _variantService.SwitchComponent(CurrentSection.SectionTitle);
-        }
-
-        CurrentSection = Variables.FirstOrDefault(s => s.SectionTitle == sectionTitle) ?? new();
-        DynamicMetadata["CurrentSection"] = CurrentSection;
+        SelectedComponentType = typeof(DefaultFormContent);
+        CurrentSection = Sections.FirstOrDefault(s => s.SectionTitle == sectionTitle) ?? new();
         await CurrentSectionChanged.InvokeAsync(CurrentSection);
-        DynamicMetadata["Variables"] = Variables;
         await InvokeAsync(StateHasChanged);
     }
 
@@ -123,16 +115,21 @@
         rule.IsChecked = args.isChecked;
         if (!args.isChecked)
             rule.ResetToPrevious();
-        await CurrentSectionChanged.InvokeAsync(CurrentSection);
 
-        await VariablesChanged.InvokeAsync(Variables);
+
+        if (!CurrentSection.Compile && args.isChecked)
+        {
+            CurrentSection.Compile = true;
+        }
+
+        await CurrentSectionChanged.InvokeAsync(CurrentSection);
+        await SectionsChanged.InvokeAsync(Sections);
     }
 
     private async Task GenerateFile()
     {
-        // string fileContent = Variables.ToCss();
-
-        using var fileContent = await _styleService.Compile(Variables);
+        // string fileContent = VarCompilationoCss();
+        using var fileContent = await _sassClient.Compile(Sections, _styleService.SelectedColors, _styleService.PrimaryColorMap);
         if (fileContent is not null)
         {
             await _fileDownloader.DownloadFile(fileContent, "custom", "css");
@@ -158,15 +155,15 @@
         await CurrentSectionChanged.InvokeAsync(CurrentSection);
     }
 
-    private async Task SetUnitValue(string key)
+    private async Task SetUnitValue((string key, string? value) args)
     {
-        // if (unit is null)
-        //     return;
-        // var rule = CurrentSection.Rules.FirstOrDefault(r => r.Key == key);
-        // if (rule is not null && rule.IsChecked)
-        // {
-        //     rule!.Unit = unit;
-        // }
+        if (args.value is null)
+            return;
+        var rule = CurrentSection.Rules.FirstOrDefault(r => r.Key == args.key);
+        if (rule is not null && rule.IsChecked)
+        {
+            rule!.Unit = args.value;
+        }
 
         await CurrentSectionChanged.InvokeAsync(CurrentSection);
     }

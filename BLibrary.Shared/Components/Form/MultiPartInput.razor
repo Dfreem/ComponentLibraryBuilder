@@ -2,7 +2,7 @@
 @using Blibrary.Shared.Components.Form
 @using Microsoft.AspNetCore.Components.Forms
 @using Blibrary.Shared.Enums
-@inherits InputBase
+@inherits InputBase<string>
 
 <div class=" d-flex" style="@Style">
     <div class="mx-auto">
@@ -44,7 +44,7 @@
 
     protected override void OnInitialized()
     {
-        var ruleSections = Rule.Value.Split(" ");
+        var ruleSections = Value.Split(" ");
         for (int i = 0; i < NumberOfUnits; i++)
         {
             if (i < ruleSections.Length)
@@ -64,15 +64,15 @@
     private async Task SetRuleValue(int index, string value)
     {
         _unitSections[index] = value;
-        Rule.Value = BuildRuleValue();
-        await RuleChanged.InvokeAsync(Rule);
+        Value = BuildRuleValue();
+        await ValueChanged.InvokeAsync(Value);
     }
 
     private async Task SetColorSection(string value)
     {
         _color = value;
-        Rule.Value = BuildRuleValue();
-        await RuleChanged.InvokeAsync(Rule);
+        Value = BuildRuleValue();
+        await ValueChanged.InvokeAsync(Value);
     }
 
     private string BuildRuleValue()

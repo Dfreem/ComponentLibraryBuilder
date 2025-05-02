@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blibrary.Shared.Enums;
+namespace Blibrary.Shared.Enums.UI;
 
-public enum DropdownReference
+public enum TooltipPosition
 {
-    Toggle,
-    Parent
+    Top,
+    Right,
+    Bottom,
+    Left,
 }
-

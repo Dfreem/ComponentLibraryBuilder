@@ -1,44 +1,92 @@
-﻿@using Blibrary.Shared.Components.Base
-@using Blibrary.Shared.Enums
+﻿@using Blibrary.Shared.Enums.Style
+@using Blibrary.Shared.Enums.Style.StyleEnums
+@using Blibrary.Shared.Enums.UI
+@using Blibrary.Shared.Extensions
 @inherits StyleableBaseComponent
 
+<div id="@Id" class="card @Class @(BgColor is not null && BgColor != BootstrapColor.Default ? BgColor?.ToBgColor() : "")" style="@Style">
+    @if (!string.IsNullOrEmpty(ImageUrl))
+    {
+        if (ImageType == CardImageType.CardCapTop)
+        {
+            <img class="card-image-top" src="@ImageUrl" />
+        }
+        else if (ImageType == CardImageType.CardImageOverlay)
+        {
+            <img class="card-image-overlay" src="@ImageUrl" />
+        }
 
-<div class="card @Class @(BgColor?.ToBgColor())" style="@Style">
+    }
     @if (CardHeader is not null)
     {
-        <div class="card-header">
+        <div class="card-header @HeaderClass">
             @CardHeader
         </div>
     }
-    <div class="card-body">
-        @if(CardTitle is not null)
+    <div class="card-body @BodyClass">
+        @if (CardTitle is not null)
         {
-            <div class="card-title">
+            string headingSize = TitleSize.Kabobify();
+            <div class="card-title @headingSize">
                 @CardTitle
             </div>
         }
+        @if(CardSubTitle is not null)
+        {
+            string headingSize = SubTitleSize.Kabobify();
+            <h4 class="card-subtitle @headingSize">
+                @CardSubTitle
+            </h4>
+        }
         @CardBody
     </div>
-    @if(CardFooter is not null)
+    @if (CardFooter is not null)
     {
-        <div class="card-footer">
+        <div class="card-footer @FooterClass">
             @CardFooter
         </div>
+    }
+    @if (ImageType == CardImageType.CardCapBottom && !string.IsNullOrEmpty(ImageUrl))
+    {
+        <img class="card-img-bottom" src="@ImageUrl" />
     }
 </div>
 
 @code {
-
     [Parameter]
     public RenderFragment? CardHeader { get; set; }
 
-    [Parameter, EditorRequired]
-    public required RenderFragment CardBody { get; set; }
+    [Parameter]
+    public HTMLHeading TitleSize { get; set; } = HTMLHeading.H4;
+
+    [Parameter]
+    public HTMLHeading SubTitleSize { get; set; } = HTMLHeading.H5;
+
+    [Parameter]
+    public RenderFragment? CardBody { get; set; }
+
+    [Parameter]
+    public RenderFragment? CardTitle { get; set; }
+
+    [Parameter]
+    public RenderFragment? CardSubTitle { get; set; }
 
     [Parameter]
     public RenderFragment? CardFooter { get; set; }
 
     [Parameter]
-    public RenderFragment? CardTitle { get; set; }
+    public string? HeaderClass { get; set; }
+
+    [Parameter]
+    public string? BodyClass { get; set; }
+
+    [Parameter]
+    public string? FooterClass { get; set; }
+
+    [Parameter]
+    public string? ImageUrl { get; set; }
+
+    [Parameter]
+    public CardImageType ImageType { get; set; }
 
 }

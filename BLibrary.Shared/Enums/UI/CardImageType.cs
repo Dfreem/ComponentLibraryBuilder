@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blibrary.Shared.Enums;
+namespace Blibrary.Shared.Enums.UI;
 public enum CardImageType
 {
     Default,

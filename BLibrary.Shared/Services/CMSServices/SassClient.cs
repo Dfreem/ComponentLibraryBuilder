@@ -1,27 +1,33 @@
-﻿using Blibrary.Shared.Models;
+﻿using Blibrary.Shared.DTO;
+using Blibrary.Shared.Models;
 
 using Serilog;
 
 using System.Net.Http.Json;
 
 namespace Blibrary.Shared.Services.CMSServices;
-public class StyleVariablesService : IStyleVariablesService
+public class SassClient
 {
-
     HttpClient _client;
-    public StyleVariablesService(HttpClient client)
+
+
+
+    public event EventHandler<ColorEventArgs>? OnSelectionChanged;
+
+    public SassClient(HttpClient client)
     {
         _client = client;
     }
 
-    public async Task<List<ScssVariableSection>?> GetVariableCollectionAsync() => await _client.GetFromJsonAsync<List<ScssVariableSection>>("api/FileContent/bootstrapVariables");
+    public async Task<StyleVariablesResponse?> GetVariableCollectionAsync() => await _client.GetFromJsonAsync<StyleVariablesResponse>("api/FileContent/bootstrapVariables");
 
-    public async Task<Stream?> Compile(List<ScssVariableSection> sections)
+    public async Task<Stream?> Compile(List<ScssVariableSection> sections, List<ScssVariable> variants, Dictionary<string, string>? colorOvveride)
     {
         Stream? result = null;
         try
         {
-            var response = await _client.PostAsJsonAsync<List<ScssVariableSection>>("api/FileContent/compile-sass", sections);
+            CompileParams args = new() { ColorSection = variants, Sections = sections, ColorMap = colorOvveride };
+            var response = await _client.PostAsJsonAsync<CompileParams>("api/FileContent/compile-sass", args);
             if (response.IsSuccessStatusCode)
             {
                 result = await response.Content.ReadAsStreamAsync();
@@ -51,4 +57,5 @@ public class StyleVariablesService : IStyleVariablesService
         return "";
 
     }
+
 }

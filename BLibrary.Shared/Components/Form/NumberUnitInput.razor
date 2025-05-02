@@ -1,7 +1,7 @@
 ﻿@using Blibrary.Shared.Components.Form
 @using Blibrary.Shared.Enums
 @using Microsoft.AspNetCore.Components.Forms
-@inherits InputBase
+@inherits InputBase<string>
 
 
 <div class="w-100">
@@ -11,15 +11,15 @@
             {
                 if (!String.IsNullOrEmpty(Text))
                 {
-                    <label class="input-group-text">@Rule.Key</label>
+                    <label class="input-group-text">@Text</label>
                 }
                 if (!Disabled)
                 {
-                    <input class="form-control" type="range" value="@Rule.Value" @oninput="SetRuleValue" />
+                    <input class="form-control" type="range" value="@Value" @oninput="SetValueValue" />
                 }
                 else
                 {
-                    <input class="form-control" type="range" value="@Rule.Value" disabled="disabled" />
+                    <input class="form-control" type="range" value="@Value" disabled="disabled" />
 
                 }
             }
@@ -27,21 +27,21 @@
             {
                 @if (!String.IsNullOrEmpty(Text))
                 {
-                    <label class="input-group-text">@Step</label>
+                    <label class="input-group-text">@Text</label>
                 }
                 @if (!Disabled)
                 {
-                    <input type="number" step="@Step" class="form-control" value="@Rule.Value" @oninput="SetRuleValue" />
+                    <input type="number" step="@Step" class="form-control" value="@Value" @oninput="SetValueValue" />
                 }
                 else
                 {
-                    <input type="number" disabled="disabled" step="@Step" class="form-control" value="@Rule.Value"  />
+                    <input type="number" disabled="disabled" step="@Step" class="form-control" value="@Value" />
                 }
             }
             <div class="fit-width">
                 @if (!Disabled)
                 {
-                    <select class="form-select" value="@Rule.Unit" @onchange="(async (args) => await SetUnitValue(args))" TValue="string">
+                    <select class="form-select" value="@Unit" @onchange="(async (args) => await SetUnitValue(args))" TValue="string">
                         @foreach (var item in Enum.GetValues<ScssSizeUnit>())
                         {
                             <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>
@@ -51,7 +51,7 @@
                 else
                 {
 
-                    <select class="form-select" value="@Rule.Unit" disabled="disabled">
+                    <select class="form-select" value="@Unit" disabled="disabled">
                         @foreach (var item in Enum.GetValues<ScssSizeUnit>())
                         {
                             <option value="@item.ToCssUnit()">@item.ToString().ToLower()</option>
@@ -76,11 +76,11 @@
 
     [Parameter]
     public bool Range { get; set; }
-
+     
     protected override void OnInitialized()
     {
         unitOptions = SizeUnit.GetCssUnits<ScssSizeUnit>();
-        Rule.Unit = unitOptions[1];
+        Unit = unitOptions[1];
         base.OnInitialized();
     }
 
@@ -92,24 +92,23 @@
 
     public async Task SetUnitValue(ChangeEventArgs args)
     {
-        Rule.Unit = args.Value?.ToString() ?? "px";
-        if (Rule.Unit.Contains("px") || Rule.Unit.Contains("%"))
+        Unit = args.Value?.ToString() ?? "px";
+        if (Unit.Contains("px") || Unit.Contains("%"))
         {
             Step = "1";
-            Rule.Value = "0";
         }
         else
         {
-            Step = "1.0";
-            Rule.Value = "0.0";
+            Step = "0.1";
         }
-        await RuleChanged.InvokeAsync(Rule);
+
+        await UnitChanged.InvokeAsync(Unit);
         await InvokeAsync(StateHasChanged);
     }
 
-    public void SetRuleValue(ChangeEventArgs args)
+    public void SetValueValue(ChangeEventArgs args)
     {
-        Rule.Value = args.Value?.ToString() ?? "";
-        RuleChanged.InvokeAsync(Rule);
+        Value = args.Value?.ToString() ?? "";
+        ValueChanged.InvokeAsync(Value);
     }
 }

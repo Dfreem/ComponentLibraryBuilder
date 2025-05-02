@@ -1,0 +1,29 @@
+﻿@if (!RendererInfo.IsInteractive)
+{
+    <div class="mt-5 pt-5">
+
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <div class="d-flex flex-column text-center justify-center">
+
+                        <div class="spinner-border text-green-300 fs-28pt mx-auto" style="width: 2em; height: 2em">
+                            <label hidden>Loading...</label>
+                        </div>
+                        <label class="fs-18pt my-2 mb-auto">Loading...</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
+

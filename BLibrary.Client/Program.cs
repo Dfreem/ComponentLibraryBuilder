@@ -1,20 +1,12 @@
 
-using Blibrary.Shared.Extensions.AppExtensions;
+using Blibrary.Shared.Extensions;
 using Blibrary.Shared.Services.CMSServices;
 using Blibrary.Shared.Services.ToastService;
 
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
-builder.Services.AddHttpClient("default", sp =>
-    sp.BaseAddress = new Uri("https://localhost:7044")
-);
-builder.Services.AddTransient<HttpClient>(sp =>
-{
-    return sp.GetRequiredService<IHttpClientFactory>().CreateClient("default");
-});
-builder.Services.AddScoped<IStyleVariablesService,StyleVariablesService>();
-builder.Services.AddCommonServices();
+builder.Services.AddCommonServices(new Uri("https://localhost:7044"));
 
 builder.Services.AddToast(options =>
 {

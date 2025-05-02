@@ -35,7 +35,7 @@ public class ScssVariable
             var _ when (Key.Contains("bg") && !Key.Contains("image") || Key.Contains("color") || Value.ScssIsColor()) && !Key.Contains("shadow") && Key != "border" => "color",
             var _ when Key.Contains("show") || Key.Contains("enable") => "checkbox",
             var _ when Key == "border" || Key.Contains("shadow") => "multi-4",
-            var _ when Key.Contains("padding") || Key.Contains("margin") || Key.Contains("radius") || Key.Contains("z-index") || Key.Contains("spacing") || Key.Contains("width") || Key.Contains("height") => "number",
+            var _ when Key.Contains("spacer") || Key.Contains("size") || Key.Contains("padding") || Key.Contains("margin") || Key.Contains("radius") || Key.Contains("z-index") || Key.Contains("spacing") || Key.Contains("width") || Key.Contains("height") => "number",
             _ => "text"
         };
         return result;

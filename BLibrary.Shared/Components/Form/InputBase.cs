@@ -10,15 +10,25 @@ using Blibrary.Shared.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace Blibrary.Shared.Components.Form;
-public class InputBase : StyleableBaseComponent
+public class InputBase<T> : StyleableBaseComponent
 {
     [Parameter]
-    public virtual ScssVariable Rule { get; set; } = default!;
+    public virtual T Value { get; set; } = default!;
 
     [Parameter]
-    public EventCallback<ScssVariable> RuleChanged { get; set; }
+    public EventCallback<T> ValueChanged { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Key { get; set; }
 
     [Parameter]
     public bool Disabled { get; set; }
+
+    [Parameter]
+    public string? Unit { get; set; }
+
+
+    [Parameter]
+    public EventCallback<string> UnitChanged { get; set; }
 
 }

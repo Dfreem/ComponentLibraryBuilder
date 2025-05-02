@@ -29,7 +29,7 @@
     }
 
     .bottom-#{$i} {
-        bottom:  calc($i * 1vh);
+        bottom: calc($i * 1vh);
     }
 
     .vh-#{$i} {
@@ -37,7 +37,10 @@
     }
 }
 
+// SIZES
+
 .size-container {
+    // mark container for use with css container query units
     container-type: size;
 }
 
@@ -45,6 +48,19 @@
     min-width: fit-content;
     max-width: fit-content;
 }
+
+@for $h from 1 through 10 {
+
+    // vertical spacer
+    .vs-#{$h}em {
+        min-height: calc($h * 1em);
+    }
+    .vs-#{calc($h * 10)}px {
+        min-height: calc($h * 10px);
+    }
+}
+
+// DISPLAY
 
 .d-contents {
     display: contents;
@@ -54,6 +70,14 @@
     cursor: pointer;
 }
 
+@for $fs from 1pt through 40pt {
+    .fs-#{calc($fs * 2)} {
+        font-size: calc($fs * 2);
+    }
+}
+
+// SCROLL
+
 .scrollbar-thin {
     scrollbar-width: thin;
 }
@@ -62,7 +86,9 @@
     scrollbar-width: none;
 }
 
-.shadow-inset{
+// SHADOW
+
+.shadow-inset {
     box-shadow: #{$shadow-inset};
 }
 
@@ -72,14 +98,9 @@
         .box-shadow-#{$d}-#{$s} {
             box-shadow: #{$d} #{$d} #{$s} #{$shadow-color};
         }
-        .box-shadow-#{$d}-#{$s}-inset {
-            box-shadow: #{$d} #{$d} #{$s} #{$shadow-color} inset;
-        }
-    }
-}
 
-@for $fs from 1pt through 40pt {
-    .fs-#{calc($fs * 2)} {
-        font-size: calc($fs * 2);
+            .box-shadow-#{$d}-#{$s}-inset {
+                box-shadow: #{$d} #{$d} #{$s} #{$shadow-color} inset;
+            }
     }
 }

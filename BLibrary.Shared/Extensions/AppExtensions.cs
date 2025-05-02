@@ -9,18 +9,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blibrary.Shared.Extensions.AppExtensions;
+namespace Blibrary.Shared.Extensions;
 
 public static class ServiceProviderExtensioins
 {
-    public static IServiceCollection AddCommonServices(this IServiceCollection services)
+    public static IServiceCollection AddCommonServices(this IServiceCollection services, Uri baseAddress)
     {
-        services.AddSingleton<IColorVariantService, ColorVariantService>(sp =>
-        {
-            using var scope = sp.CreateScope();
-            ColorVariantService service = new();
-            return service;
-        });
+        services.AddHttpClient<SassClient>(client => client.BaseAddress = baseAddress);
+        services.AddSingleton<ISassCompilationService, SassCompilationService>();
 
         return services;
     }
@@ -61,5 +57,10 @@ public static class SectionListExtensions
     {
         var colorSection = sections.FirstOrDefault(s => s.SectionTitle == "color-variables");
         return colorSection?.Rules;
+    }
+
+    public static Dictionary<string, string> ToColorMap(this List<ScssVariable> section)
+    {
+        return section.ToDictionary(s => s.Key, s => s.Value);
     }
 }

@@ -6,6 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 using Blibrary.Shared.Helpers;
+using Blibrary.Shared.DTO;
 
 namespace Blibrary.Services;
 public class BootstrapStyleService
@@ -35,16 +36,24 @@ public class BootstrapStyleService
     {
 
     }
-    public async Task<List<ScssVariableSection>> GetBaseVariablesAsync()
+
+    public List<string> GetSectionNames()
+    {
+        var templateFiles = Directory.GetFiles("wwwroot/scss/components/templates/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
+        return [.. templateFiles];
+    }
+
+    public async Task<StyleVariablesResponse> GetBaseVariablesAsync()
     {
         List<ScssVariableSection> results = new();
+        StyleVariablesResponse response = new();
         try
         {
-            Regex scssSectionGrabber = ScssRegexHelper.ScssSectionGrabber();
             Regex titleGrabber = ScssRegexHelper.ScssSectionStartPattern();
             Regex ruleGrabber = ScssRegexHelper.CssRuleGrabber();
             string bootstrapScssVariables = await File.ReadAllTextAsync(Path.GetFullPath("./wwwroot/lib/bootstrap/scss/_variables.scss"));
             var templateFiles = Directory.GetFiles("wwwroot/scss/components/templates/").Select(f => Path.GetFileName(f).Replace("_", "").Replace(".scss", "")).Where(f => !_ignore.Contains(f));
+            Regex scssSectionGrabber = ScssRegexHelper.ScssSectionGrabber();
             var sections = scssSectionGrabber.Matches(bootstrapScssVariables);
 
             // get individual bootstrap components
@@ -69,67 +78,89 @@ public class BootstrapStyleService
                 }
             }
 
-            // theme color variables for populating color dropdown by name and generating color variants
-            Match? colorSection = null;
-            foreach (Match section in sections)
-            {
-                if(!section.Success || section.Groups.Count <= 1)
-                    continue;
-
-                // sections start with `// scss-docs-start {section title}
-                var sectionContent = section.Groups[0].Value;
-                var titleMatch = titleGrabber.Match(sectionContent);
-
-                // title-grabber grabs the entire line, ex: // scss-docs-start color-variables -> ["//", "scss-docs-start", "color-vartiables"]
-                var titleParts = titleMatch.Groups[0].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var title = titleParts[^1];
-                if(title == "color-variables")
-                {
-                    colorSection = section;
-                    break;
-                }
-            }
-
-            ScssVariableSection themeColorVariables = new() { SectionTitle = "color-variables" };
-            // extract color variables
-            if (colorSection is not null)
-            {
-                var sectionTitle = titleGrabber.Match(colorSection.Value);
-                var scssRuleGrabber = ScssRegexHelper.ScssRuleGrabber();
-                var rules = scssRuleGrabber.Matches(colorSection.Value);
-                var ruleList = rules.Where(
-                    r => r.Success && 
-                    !r.Groups[1].Value.Contains("zindex") && // ignore z-index variables
-                    r.Groups[2].Value.ScssIsColor())
-                    .Select(r =>
-                    {
-                        // Regex.Match includes the entire match in the first position of the array and then the captured groups
-                        // if there are less then 3 groups, the match didn't work
-                        string value = r.Groups.Count > 2 ? r.Groups[2].Value.Replace("!default", "").Trim() : "";
-                        string noHashtag = value.Replace("#", "");
-                        if (noHashtag.Length <= 3)
-                        {
-                            value = value + noHashtag;
-                        }
-                        return new ScssVariable()
-                        {
-                            Key = r.Groups[1].Value,
-                            Original = r.Groups[1].Value,
-                            Value = value
-                        };
-                    }).DistinctBy(r => r.Key);
-
-                themeColorVariables.Rules = [.. ruleList];
-                results.Add(themeColorVariables);
-            }
+            response.Sections = results;
+            response.ColorSection = await GetColorSectionAsync(bootstrapScssVariables);
 
         }
         catch (Exception ex)
         {
             Log.Error("an error ocurred while retrieving bootstrap variables\n{err}", ex);
         }
-        return results;
 
+        return response;
+    }
+
+    public async Task<ScssVariableSection> GetColorSectionAsync(string inputString)
+    {
+        ScssVariableSection themeColorVariables = new() { SectionTitle = "color-variables" };
+        try
+        {
+
+            await Task.Run(() =>
+            {
+
+                Regex scssSectionGrabber = ScssRegexHelper.ScssSectionGrabber();
+                Regex titleGrabber = ScssRegexHelper.ScssSectionStartPattern();
+                var sections = scssSectionGrabber.Matches(inputString);
+                // theme color variables for populating color dropdown by name and generating color variants
+                Match? colorSection = null;
+                foreach (Match section in sections)
+                {
+                    if (!section.Success || section.Groups.Count <= 1)
+                        continue;
+
+                    // sections start with `// scss-docs-start {section title}
+                    var sectionContent = section.Groups[0].Value;
+                    var titleMatch = titleGrabber.Match(sectionContent);
+
+                    // title-grabber grabs the entire line, ex: // scss-docs-start color-variables -> ["//", "scss-docs-start", "color-vartiables"]
+                    var titleParts = titleMatch.Groups[0].Value.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    var title = titleParts[^1];
+                    if (title == "color-variables")
+                    {
+                        colorSection = section;
+                        break;
+                    }
+                }
+
+                // extract color variables
+                if (colorSection is not null)
+                {
+                    var sectionTitle = titleGrabber.Match(colorSection.Value);
+                    var scssRuleGrabber = ScssRegexHelper.ScssRuleGrabber();
+                    var rules = scssRuleGrabber.Matches(colorSection.Value);
+                    var ruleList = rules.Where(
+                        r => r.Success &&
+                        !r.Groups[1].Value.Contains("zindex") && // ignore z-index variables
+                        r.Groups[2].Value.ScssIsColor())
+                        .Select(r =>
+                        {
+                            // Regex.Match includes the entire match in the first position of the array and then the captured groups
+                            // if there are less then 3 groups, the match didn't work
+                            string value = r.Groups.Count > 2 ? r.Groups[2].Value.Replace("!default", "").Trim() : "";
+                            string noHashtag = value.Replace("#", "");
+                            if (noHashtag.Length <= 3)
+                            {
+                                value = value + noHashtag;
+                            }
+                            return new ScssVariable()
+                            {
+                                Key = r.Groups[1].Value,
+                                Original = r.Groups[1].Value,
+                                Value = value
+                            };
+                        }).DistinctBy(r => r.Key);
+
+                    themeColorVariables.Rules = [.. ruleList];
+                }
+                return themeColorVariables;
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Error("Error occurred while getting color variable section\n{ex}", ex);
+        }
+        return themeColorVariables;
     }
 
     public async Task<ScssVariableSection> GetOptionsSection()

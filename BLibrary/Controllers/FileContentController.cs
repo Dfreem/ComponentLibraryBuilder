@@ -13,7 +13,7 @@ using Blibrary.Services;
 using Blibrary.Shared.Models;
 using AspNetCore.SassCompiler;
 using System.Text;
-using Blibrary.Shared.Extensions.AppExtensions;
+using Blibrary.Shared.DTO;
 
 namespace Blibrary.Controllers;
 
@@ -60,34 +60,50 @@ public partial class FileContentController : ControllerBase
     //    return result;
     //}
 
+    [HttpGet("section-names")]
+    public List<string> GetSectionNamesAsync()
+    {
+        return _bootstrapStyleService.GetSectionNames();
+    }
+
     [HttpPost("compile-sass")]
-    public async Task<string> CompileSass([FromBody] List<ScssVariableSection> sections)
+    public async Task<string> CompileSass([FromBody] CompileParams args)
     {
         string scssPath = String.Empty;
         string result = "";
 
-        sections.ColorSectionVariables();
+        args.Sections.ColorSectionVariables();
         Regex importsGrabber = ScssRegexHelper.ScssImportsGrabber();
 
 
         string fileContents = "";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_functions.scss") + "\n\n";
+
+        // bootstrap theme color overrides
+        var themeColors = args.ColorMap?.Select(c =>
+        {
+            return $"${c.Key}: {c.Value};\n";
+        }).ToArray();
+        if(themeColors is not null)
+            fileContents += String.Join('\n', themeColors);
+
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_variables.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_variables-dark.scss") + "\n\n";
+
+        //fileContents = fileContents.Replace("@import \"variables-dark\";", "");
+        if (args.ColorSection.Count > 0)
+        {
+            var (fileThemeVariables, fileThemeMap) = ProcessThemeColors(args.ColorSection, args.ColorMap);
+            fileContents += fileThemeVariables;
+            fileContents += fileThemeMap;
+        }
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_maps.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_mixins.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_utilities.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/vendor/_rfs.scss") + "\n\n";
         fileContents += System.IO.File.ReadAllText("./wwwroot/lib/bootstrap/scss/_root.scss") + "\n\n";
-        //fileContents = fileContents.Replace("@import \"variables-dark\";", "");
-        foreach (var section in sections.Where(s => s.Rules.Any(r => r.IsChecked)))
+        foreach (var section in args.Sections.Where(s => s.Compile))
         {
-            if (section.HasVariants)
-            {
-                var (fileThemeVariables, fileThemeMap) = ProcessThemeColors(section.ColorVariations);
-                fileContents += fileThemeVariables;
-                fileContents += fileThemeMap;
-            }
             fileContents += System.IO.File.ReadAllText($"./wwwroot/lib/bootstrap/scss/_{section.SectionTitle}.scss") + "\n\n";
             fileContents += section.ToScssSection() + "\n";
             string sectionTitle = section.SectionTitle;
@@ -139,9 +155,9 @@ public partial class FileContentController : ControllerBase
     /// </remarks>
     /// <returns>A list of editable component sections containing variables that control the look and feel of the customized components </returns>
     [HttpGet("bootstrapVariables")]
-    public async Task<List<ScssVariableSection>> GetBootstrapVariables() => await _bootstrapStyleService.GetBaseVariablesAsync();
+    public async Task<StyleVariablesResponse> GetBootstrapVariables() => await _bootstrapStyleService.GetBaseVariablesAsync();
 
-    private (string themeColorVariables, string themeColorMap) ProcessThemeColors(List<ScssVariable> colors)
+    private (string themeColorVariables, string themeColorMap) ProcessThemeColors(List<ScssVariable> colors, Dictionary<string, string>? colorVariableOverrides)
     {
         string themeColorVariables = "";
         string themeColorMap = "$theme-colors: map-merge-multiple(";
@@ -150,8 +166,18 @@ public partial class FileContentController : ControllerBase
             themeColorVariables += $"${color.Key}: {color.Value};\n";
             themeColorMap += $"${color.Key}s, ";
         }
+        if (colorVariableOverrides is not null)
+        {
+            foreach (var color in colorVariableOverrides)
+            {
+                themeColorVariables += $"${color.Key}: {color.Value};\n";
+                themeColorMap += $"${color.Key}s, ";
+
+            }
+        }
         themeColorMap = themeColorMap.Remove(themeColorMap.LastIndexOf(','), 1);
         themeColorMap += ");\n";
         return (themeColorVariables, themeColorMap);
     }
+
 }

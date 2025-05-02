@@ -22,10 +22,10 @@
 		<None Include="compilerconfig.json" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="AspNetCore.SassCompiler" Version="1.86.2" />
+		<PackageReference Include="AspNetCore.SassCompiler" Version="1.87.0" />
 		<PackageReference Include="BuildWebCompiler2022" Version="1.14.15" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.4" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.1">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -35,10 +35,9 @@
 		<PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageReference Include="Wacton.Unicolour" Version="5.0.0" />
+		<PackageReference Include="Wacton.Unicolour" Version="6.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="wwwroot\css\" />
 		<Folder Include="wwwroot\temp\css\" />
 		<Folder Include="wwwroot\temp\scss\" />
 	</ItemGroup>

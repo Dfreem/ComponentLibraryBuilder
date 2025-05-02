@@ -16,27 +16,8 @@
 
                     </ModalHeader>
                     <ModalBody>
-                        <div class="row">
-                            <div class="col">
-                                Modal Variables: <br />
-                            </div>
-                        </div>
-
-                        @foreach (var item in Variables.Where(v => v.SectionTitle == "modal"))
-                        {
-                            <div class="row">
-                                <div class="col">
-                                    @item.SectionTitle
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <div class="d-flex flex-wrap">
-                                        @((MarkupString)item.ToCssSection(false).Replace(";", ";<br />"))
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                        <div class="modal-title">Modal Body</div>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
                     </ModalBody>
                     <ModalFooter>
                         Modal Footer
@@ -53,27 +34,8 @@
 
                     </ModalHeader>
                     <ModalBody>
-                        <div class="row">
-                            <div class="col">
-                                Modal Variables: <br />
-                            </div>
-                        </div>
-
-                        @foreach (var item in Variables.Where(v => v.SectionTitle == "modal"))
-                        {
-                            <div class="row">
-                                <div class="col">
-                                    @item.SectionTitle
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <div class="d-flex flex-wrap">
-                                        @((MarkupString)item.ToCssSection(false).Replace(";", ";<br />"))
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                        <div class="modal-title">Modal Body</div>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
                     </ModalBody>
                 </Modal>
             }
@@ -82,16 +44,11 @@
 </div>
 @code {
     [Parameter]
-    public List<ScssVariableSection> Variables { get; set; } = [];
+    public ScssVariableSection CurrentSection { get; set; } = default!;
 
     [Parameter]
     public List<ScssVariable> ColorSection { get; set; } = [];
 
-    [Parameter]
-    public List<ScssVariable> SelectedColors { get; set; } = [];
-
-    [Parameter]
-    public EventCallback<List<ScssVariable>> SelectedColorsChanged { get; set; }
 
     [Parameter]
     public bool HasFooter { get; set; }

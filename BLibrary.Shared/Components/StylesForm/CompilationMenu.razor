@@ -1,0 +1,163 @@
+﻿@using Blibrary.Shared.Components.Card
+@using Blibrary.Shared.Enums.Style
+@using Blibrary.Shared.Extensions
+@using Blibrary.Shared.Models
+@using Blibrary.Shared.Services.CMSServices
+@using Wacton.Unicolour
+@using Blibrary.Shared.Components.Form
+@using static Enums.Style.StyleEnums.HTMLHeading
+@inject ISassCompilationService _sassCompilationService
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="fs-18pt mb-1">Theme Colors</div>
+    </div>
+    @foreach (var key in _sassCompilationService.PrimaryColorMap.Keys)
+    {
+        <div class="row">
+            <div class="col">
+                <ToggleSwitch Key="@key" @bind-Value='_colorStatus[key]' />
+            </div>
+            <div class="col">
+                <ColorInput ColorVariableDropdown="_sassCompilationService.ColorSection"
+                            Disabled="!_colorStatus[key]"
+                            Key="@key"
+                            @bind-Value='_sassCompilationService.PrimaryColorMap[key]' />
+            </div>
+        </div>
+    }
+
+</div>
+
+@* <div class="container-fluid">
+
+    <div class="form-title my-2">
+        Color Variants
+    </div>
+    <div class="row mb-1 row-cols-2">
+
+        <div class="col">
+            <Card TitleSize="H5"
+                  SubTitleSize="H6"
+                  FooterClass="border-0 p-o bg-secondary-subtle"
+                  Class="bg-secondary-subtle">
+
+                <CardTitle>Available</CardTitle>
+                <CardBody>
+                    <div class="d-grid vs-10em">
+
+                        @foreach (var variation in _sassCompilationService.ColorSection.OrderBy(v => new Unicolour(v.Value).DominantWavelength))
+                        {
+                            <div class="col text-center px-1">
+                                @if (_sassCompilationService.SelectedColors.Any(c => c.Key == variation.Key))
+                                {
+                                    <div hidden class="badge border-grey-400">
+                                        @variation.Key
+                                    </div>
+                                }
+                                else
+                                {
+
+                                    <div @onclick="(() => _sassCompilationService.SelectColor(variation))" class="badge fit-width shadow border border-1 hover-pointer border-grey-400" style="@GetSwatchStyle(variation.Value)">
+                                        @variation.Key
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </CardBody>
+                <CardFooter>
+                    <button class="btn w-100 m-0 btn-yellow-300" type="button" @onclick="AddAllColors">Add All</button>
+                </CardFooter>
+            </Card>
+        </div>
+        <div class="col">
+            <Card TitleSize="H5"
+                  SubTitleSize="H6"
+                  FooterClass="border-0 p-o bg-secondary-subtle"
+                  Class="bg-secondary-subtle">
+
+                <CardTitle>Selected</CardTitle>
+                <CardBody>
+                    <div class="d-flex flex-wrap row-cols-3 vs-10em justify-content-around">
+                        @foreach (var variation in _sassCompilationService.SelectedColors.OrderBy(v => new Unicolour(v.Value).DominantWavelength))
+                        {
+                            <div class="col-auto">
+                                <div @onclick="(() => _sassCompilationService.UnSelectColor(variation))" class="badge mb-1 shadow border border-1 hover-pointer border-grey-400" style="@GetSwatchStyle(variation.Value)">
+                                    @variation.Key
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </CardBody>
+                <CardFooter>
+                    <button class="btn w-100 m-0 btn-yellow-300" type="button" @onclick="(() => _sassCompilationService.UnselectAllColors())">Clear All</button>
+                </CardFooter>
+            </Card>
+        </div>
+        <label class="form-label">Components to Compile</label>
+        <div class="d-flex flex-column w-100 vs-2em justify-content-center">
+            <div class="col">
+
+                @foreach (var item in AllSections)
+                {
+                    <div class="form-check">
+                        <label class="form-check-label">@item.SectionTitle</label>
+                        <input type="checkbox" class=" form-check-input" checked="@item.Compile" @onchange="((args) => EnableDisableCompilation(item))" />
+                    </div>
+                }
+            </div>
+            <div class="col">
+                @foreach (var color in _sassCompilationService.PrimaryColorMap)
+                {
+                    ScssVariable rule = new() { Key = color.Key, Value = color.Value, Original = color.Value };
+                    <div class="d-flex w-100 form-row">
+                        <label>@color.Key</label>
+                        <ColorInput Rule="rule"
+                                    ColorVariableDropdown="_sassCompilationService.ColorSection"
+                                    RuleChanged="((r) => _sassCompilationService.PrimaryColorMap[r.Key] = r.Value)" />
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div> *@
+@code {
+
+    [Parameter]
+    public List<ScssVariableSection> AllSections { get; set; } = [];
+
+    private Dictionary<string, bool> _colorStatus = [];
+
+    protected override Task OnInitializedAsync()
+    {
+        _sassCompilationService.OnSelectionChanged += async (sender, args) =>
+        {
+            await InvokeAsync(StateHasChanged);
+        };
+        _colorStatus = _sassCompilationService.PrimaryColorMap.Keys.ToList().ToDictionary(c => c, c => false);
+        return base.OnInitializedAsync();
+    }
+
+    private string GetSwatchStyle(string color)
+    {
+        var textColor = new Unicolour(color).GetCompliment();
+        string value = $"background-color: {color}; color: {textColor.Hex};";
+        return value;
+    }
+
+    private void EnableDisableCompilation(ScssVariableSection section)
+    {
+        _sassCompilationService.EnableDisableCompilationFor(section.SectionTitle);
+        section.Compile = !section.Compile;
+    }
+
+    private async Task AddAllColors()
+    {
+        _sassCompilationService.SelectAllColors();
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+}

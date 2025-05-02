@@ -1,33 +1,36 @@
 ﻿@using Blibrary.Shared.Components.Form
 @using Blibrary.Shared.Models
 
-@inherits InputBase
+@inherits InputBase<string>
 
 <div class="d-flex flex-nowrap">
 
-    @if (Rule.IsChecked)
+    @if (!Disabled)
     {
         <select @onchange="SetRuleValue" class="form-select">
+            <option value="" />
             @foreach (var item in ColorVariableDropdown)
             {
-                @if (item.Key == Rule.Key)
+                string optionKey = $"option-{item.Key}";
+                @if (item.Key == Key || item.Value == Value)
                 {
-                    <option selected value="@item.Value">@item.Key</option>
+                    <option @key="optionKey" selected value="@item.Value">@item.Key</option>
                 }
                 else
                 {
-                    <option value="@item.Value">@item.Key</option>
+                    <option @key="optionKey" value="@item.Value">@item.Key</option>
                 }
             }
         </select>
-        <input class="form-control-color p-0" type="color" value="@Rule.Value" @oninput='SetRuleValue' />
+        <input class="form-control-color p-0" type="color" value="@Value" @oninput='SetRuleValue' />
     }
     else
     {
         <select disabled @onchange="SetRuleValue" class="form-select">
+            <option value="" />
             @foreach (var item in ColorVariableDropdown)
             {
-                @if (item.Key == Rule.Key)
+                @if (item.Key == Key || item.Value == Value)
                 {
                     <option selected value="@item.Value">@item.Key</option>
                 }
@@ -37,7 +40,7 @@
                 }
             }
         </select>
-        <input disabled class="form-control-color p-0" type="color" value="@Rule.Value" />
+        <input disabled class="form-control-color p-0" type="color" value="@Value" />
     }
 </div>
 
@@ -48,8 +51,8 @@
 
     private async Task SetRuleValue(ChangeEventArgs args)
     {
-        Rule.Value = args.Value?.ToString() ?? "";
-        await RuleChanged.InvokeAsync(Rule);
+        Value = args.Value?.ToString() ?? "";
+        await ValueChanged.InvokeAsync(Value);
     }
 
     [Parameter]
