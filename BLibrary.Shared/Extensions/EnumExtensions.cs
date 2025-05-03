@@ -38,47 +38,30 @@ public static class EnumExtensions
 
     public static string Kabobify<T>(this T value) where T : struct, Enum
     {
-        string stringValue = Enum.GetName(value) ?? "";
+        string enumName = Enum.GetName(value) ?? "";
+        if (string.IsNullOrEmpty(enumName))
+            return "";
+        return enumName.Kabobify();
 
-        for (int i = 0; i < stringValue.Length; i++)
-        {
-            if (char.IsNumber(stringValue[i]) && i + 1 < stringValue.Length && !char.IsNumber(stringValue[i - 1]) && stringValue[i-1] != '-')
-            {
-                stringValue = stringValue.Replace(stringValue[i].ToString(), $"-{stringValue[i]}");
-            }
-            if (char.IsUpper(stringValue[i]))
-            {
-                if (i == 0)
-                {
-                    stringValue = stringValue.Remove(i, 1).Insert(i, char.ToLower(stringValue[i]).ToString());
-                }
-                else
-                {
-                    stringValue = stringValue.Remove(i, 1).Insert(i, $"-{char.ToLower(stringValue[i])}");
-                }
-            }
-        }
-        return stringValue ?? "";
     }
 
     public static string Kabobify(this string value)
     {
-
-        for (int i = 0; i < value?.Length; i++)
+        var builder = new StringBuilder();
+        for (int i = 0; i < value.Length; i++)
         {
-            if (char.IsUpper(value[i]))
-            {
-                if (i == 0)
-                {
-                    value = value.Remove(i, 1).Insert(i, char.ToLower(value[i]).ToString());
-                }
-                else
-                {
-                    value = value.Remove(i, 1).Insert(i, $"-{char.ToLower(value[i])}");
-                }
-            }
+            char c = value[i];
+
+            // Add a hyphen before uppercase letters unless part of a capitalized group
+            if (i > 0 &&
+                (char.IsUpper(c) && !char.IsUpper(value[i - 1]) ||
+                 char.IsUpper(c) && i + 1 < value.Length && char.IsLower(value[i + 1]) ||
+                 char.IsDigit(c) && !char.IsDigit(value[i - 1])))
+                builder.Append('-');
+
+            builder.Append(char.ToLower(c));
         }
-        return value ?? "";
+        return builder.ToString();
     }
 
     public static string GetInputType<T>(this T enumValue) where T : struct, Enum

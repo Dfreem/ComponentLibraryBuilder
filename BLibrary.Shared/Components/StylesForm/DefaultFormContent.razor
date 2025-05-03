@@ -20,8 +20,8 @@
 
                         <FormRow @key="rule"
                                  Rule="rule" SetRuleValue="async (args) => await SetRuleValue.InvokeAsync((args.Item1, args.Item2))"
-                                 SetUnitValue="(async(u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
-                                 ColorSection="_compilationService.ColorSection"
+                                 SetUnitValue="(async (u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
+                                 ColorSection="_colorDropdown"
                                  IsChecked="rule.IsChecked"
                                  IsCheckedChanged="(async (args) => await CheckRule.InvokeAsync((rule.Key, args)))" />
                     </div>
@@ -32,9 +32,9 @@
 
                         <FormRow @key="rule"
                                  Rule="rule"
-                                 SetUnitValue="(async(u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
+                                 SetUnitValue="(async (u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
                                  SetRuleValue="async (args) => await SetRuleValue.InvokeAsync((args.Item1, args.Item2))"
-                                 ColorSection="_compilationService.ColorSection"
+                                 ColorSection="_colorDropdown"
                                  IsChecked="rule.IsChecked"
                                  IsCheckedChanged="(async (args) => await CheckRule.InvokeAsync((rule.Key, args)))" />
                     </div>
@@ -48,9 +48,9 @@
                     <div class="row mb-1">
 
                         <FormRow @key="rule"
-                                 SetUnitValue="(async(u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
+                                 SetUnitValue="(async (u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
                                  Rule="rule" SetRuleValue="async (args) => await SetRuleValue.InvokeAsync((args.Item1, args.Item2))"
-                                 ColorSection="_compilationService.ColorSection"
+                                 ColorSection="_colorDropdown"
                                  IsChecked="rule.IsChecked"
                                  IsCheckedChanged="(async (args) => await CheckRule.InvokeAsync((rule.Key, args)))" />
                     </div>
@@ -61,9 +61,9 @@
 
                         <FormRow @key="rule"
                                  Rule="rule"
-                                 SetUnitValue="(async(u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
+                                 SetUnitValue="(async (u) => await SetUnitValue.InvokeAsync((u.Item1, u.Item2)))"
                                  SetRuleValue="async (args) => await SetRuleValue.InvokeAsync((args.Item1, args.Item2))"
-                                 ColorSection="_compilationService.ColorSection"
+                                 ColorSection="_colorDropdown"
                                  IsChecked="rule.IsChecked"
                                  IsCheckedChanged="(async (args) => await CheckRule.InvokeAsync((rule.Key, args)))" />
                     </div>
@@ -94,6 +94,7 @@
     List<ScssVariable> _colors = [];
     List<ScssVariable> _numbers = [];
     List<ScssVariable> _multiParts = [];
+    List<ScssVariable> _colorDropdown = [];
 
     [Parameter]
     public EventCallback<string> CheckOptionsBox { get; set; }
@@ -103,7 +104,7 @@
         _colors = CurrentSection.Rules.Where(r => r.InputType() == "color").ToList();
         _numbers = CurrentSection.Rules.Where(r => r.InputType() == "number").ToList();
         _multiParts = CurrentSection.Rules.Where(r => r.InputType().Contains("multi")).ToList();
-
+        _colorDropdown = _compilationService.ColorSection.Concat(_compilationService.PrimaryColorMap.Select(m => new ScssVariable() { Key = m.Key, Value = m.Value })).ToList();
         base.OnParametersSet();
     }
 
@@ -111,7 +112,7 @@
     {
         _compilationService.OnSelectionChanged += async (sender, args) =>
         {
-            
+
             await InvokeAsync(StateHasChanged);
         };
         await base.OnInitializedAsync();

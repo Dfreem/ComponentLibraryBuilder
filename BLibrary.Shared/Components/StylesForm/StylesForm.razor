@@ -49,13 +49,11 @@
         </div>
     </div>
 
-    <EditForm OnSubmit="GenerateFile" Model="this">
-        @if (SelectedComponentType is not null)
-        {
-            <DynamicComponent Type="SelectedComponentType" Parameters="DynamicMetadata" />
+    @if (SelectedComponentType is not null)
+    {
+        <DynamicComponent Type="SelectedComponentType" Parameters="DynamicMetadata" />
 
-        }
-    </EditForm>
+    }
 </div>
 <FileDownloader @ref='_fileDownloader'></FileDownloader>
 @code {

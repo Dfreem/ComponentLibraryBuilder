@@ -33,11 +33,11 @@ public class SassCompilationService : ISassCompilationService
 
     public void EnableDisableCompilationFor(string sectionTitle)
     {
-        bool compile = true;
+        bool compile = false;
         if (!_variantSections.Remove(sectionTitle))
         {
             _variantSections.Add(sectionTitle);
-            compile = false;
+            compile = true;
         }
         OnEnableDisableCompilation?.Invoke(this, new() { Compile = compile, SectionTitle = sectionTitle });
     }

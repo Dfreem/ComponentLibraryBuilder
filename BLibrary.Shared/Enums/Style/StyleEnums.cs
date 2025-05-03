@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Blibrary.Shared.Enums.Style.StyleEnums;
+namespace Blibrary.Shared.Enums.Style;
 
 public enum HTMLHeading
 {

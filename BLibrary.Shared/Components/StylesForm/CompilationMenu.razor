@@ -1,20 +1,23 @@
 ﻿@using Blibrary.Shared.Components.Card
+@using Blibrary.Shared.Components.Icon
+@using Blibrary.Shared.Enums.Icon
 @using Blibrary.Shared.Enums.Style
 @using Blibrary.Shared.Extensions
 @using Blibrary.Shared.Models
 @using Blibrary.Shared.Services.CMSServices
+@using Microsoft.AspNetCore.Components.Forms
 @using Wacton.Unicolour
 @using Blibrary.Shared.Components.Form
-@using static Enums.Style.StyleEnums.HTMLHeading
+@using static Blibrary.Shared.Enums.Style.HTMLHeading
 @inject ISassCompilationService _sassCompilationService
 
 <div class="container-fluid">
     <div class="row">
-        <div class="fs-18pt mb-1">Theme Colors</div>
+        <div class="fs-18pt mb-3">Theme Colors</div>
     </div>
     @foreach (var key in _sassCompilationService.PrimaryColorMap.Keys)
     {
-        <div class="row">
+        <div class="row mb-2">
             <div class="col">
                 <ToggleSwitch Key="@key" @bind-Value='_colorStatus[key]' />
             </div>
@@ -27,108 +30,73 @@
         </div>
     }
 
+    <div class="row mb-2">
+        <div class="col">
+            <a class="link icon-link" @onclick='PlusIconClick'>
+                <Icon IconName="IconFontAwesome.FaPlusCircle"
+                      FontSize="FontSize.FS34"
+                      Color="BootstrapColor.Success"
+                      IconSet="Enums.UI.IconSet.FontAwesomeSolid" />
+            </a>
+        </div>
+        <div class="col">
+            @if (AddingThemeColor)
+            {
+                <div class="d-flex w-100 justify-content-between">
+                    <input @bind-value='NewColor.ColorName' type="text" class="form-control form-control-plaintext" />
+                    <a @onclick='AddThemeColor' class="icon-link">
+                        <Icon IconName="IconFontAwesome.FaCheckSquare"
+                              FontSize="FontSize.FS30"
+                              IconSet="Enums.UI.IconSet.FontAwesomeSolid"
+                              Color="BootstrapColor.Success" />
+                    </a>
+                </div>
+                <div class="d-flex w-100 justify-content-between">
+
+                    @if (_invalid)
+                    {
+                        <div class="text-danger">
+                            Variable must have a name
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <hr />
+    @foreach (var item in AllSections)
+    {
+        <div class="row">
+            <div class="col">
+                <div class="form-check">
+                    <label class="form-check-label">
+                        @item.SectionTitle
+                    </label>
+                    <input @key='@item' checked="@item.Compile" type="checkbox" class="form-check-input" @onchange='(() => EnableDisableCompilation(item))' />
+                </div>
+            </div>
+            
+        </div>
+    }
 </div>
-
-@* <div class="container-fluid">
-
-    <div class="form-title my-2">
-        Color Variants
-    </div>
-    <div class="row mb-1 row-cols-2">
-
-        <div class="col">
-            <Card TitleSize="H5"
-                  SubTitleSize="H6"
-                  FooterClass="border-0 p-o bg-secondary-subtle"
-                  Class="bg-secondary-subtle">
-
-                <CardTitle>Available</CardTitle>
-                <CardBody>
-                    <div class="d-grid vs-10em">
-
-                        @foreach (var variation in _sassCompilationService.ColorSection.OrderBy(v => new Unicolour(v.Value).DominantWavelength))
-                        {
-                            <div class="col text-center px-1">
-                                @if (_sassCompilationService.SelectedColors.Any(c => c.Key == variation.Key))
-                                {
-                                    <div hidden class="badge border-grey-400">
-                                        @variation.Key
-                                    </div>
-                                }
-                                else
-                                {
-
-                                    <div @onclick="(() => _sassCompilationService.SelectColor(variation))" class="badge fit-width shadow border border-1 hover-pointer border-grey-400" style="@GetSwatchStyle(variation.Value)">
-                                        @variation.Key
-                                    </div>
-                                }
-                            </div>
-                        }
-                    </div>
-                </CardBody>
-                <CardFooter>
-                    <button class="btn w-100 m-0 btn-yellow-300" type="button" @onclick="AddAllColors">Add All</button>
-                </CardFooter>
-            </Card>
-        </div>
-        <div class="col">
-            <Card TitleSize="H5"
-                  SubTitleSize="H6"
-                  FooterClass="border-0 p-o bg-secondary-subtle"
-                  Class="bg-secondary-subtle">
-
-                <CardTitle>Selected</CardTitle>
-                <CardBody>
-                    <div class="d-flex flex-wrap row-cols-3 vs-10em justify-content-around">
-                        @foreach (var variation in _sassCompilationService.SelectedColors.OrderBy(v => new Unicolour(v.Value).DominantWavelength))
-                        {
-                            <div class="col-auto">
-                                <div @onclick="(() => _sassCompilationService.UnSelectColor(variation))" class="badge mb-1 shadow border border-1 hover-pointer border-grey-400" style="@GetSwatchStyle(variation.Value)">
-                                    @variation.Key
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </CardBody>
-                <CardFooter>
-                    <button class="btn w-100 m-0 btn-yellow-300" type="button" @onclick="(() => _sassCompilationService.UnselectAllColors())">Clear All</button>
-                </CardFooter>
-            </Card>
-        </div>
-        <label class="form-label">Components to Compile</label>
-        <div class="d-flex flex-column w-100 vs-2em justify-content-center">
-            <div class="col">
-
-                @foreach (var item in AllSections)
-                {
-                    <div class="form-check">
-                        <label class="form-check-label">@item.SectionTitle</label>
-                        <input type="checkbox" class=" form-check-input" checked="@item.Compile" @onchange="((args) => EnableDisableCompilation(item))" />
-                    </div>
-                }
-            </div>
-            <div class="col">
-                @foreach (var color in _sassCompilationService.PrimaryColorMap)
-                {
-                    ScssVariable rule = new() { Key = color.Key, Value = color.Value, Original = color.Value };
-                    <div class="d-flex w-100 form-row">
-                        <label>@color.Key</label>
-                        <ColorInput Rule="rule"
-                                    ColorVariableDropdown="_sassCompilationService.ColorSection"
-                                    RuleChanged="((r) => _sassCompilationService.PrimaryColorMap[r.Key] = r.Value)" />
-                    </div>
-                }
-
-            </div>
-        </div>
-    </div>
-</div> *@
 @code {
 
     [Parameter]
     public List<ScssVariableSection> AllSections { get; set; } = [];
 
     private Dictionary<string, bool> _colorStatus = [];
+
+    bool _invalid;
+
+    public bool AddingThemeColor { get; set; }
+
+    public class ThemeColorFormModel
+    {
+        public string ColorName { get; set; } = "";
+        public string ColorValue { get; set; } = "";
+    }
+
+    public ThemeColorFormModel NewColor { get; set; } = new();
 
     protected override Task OnInitializedAsync()
     {
@@ -159,5 +127,26 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private void PlusIconClick()
+    {
+        AddingThemeColor = true;
+    }
+
+    private async Task AddThemeColor()
+    {
+        if (NewColor.ColorName.Length == 0)
+        {
+            _invalid = true;
+        }
+        else
+        {
+
+            _sassCompilationService.PrimaryColorMap.Add(NewColor.ColorName, "#ffffff");
+            _colorStatus.Add(NewColor.ColorName, true);
+            AddingThemeColor = false;
+            _invalid = false;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 
 }

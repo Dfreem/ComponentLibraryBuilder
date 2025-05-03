@@ -1,0 +1,36 @@
+﻿@using Blibrary.Shared.Enums.Style
+@using Blibrary.Shared.Enums.UI
+@using Blibrary.Shared.Extensions
+@typeparam TIcon where TIcon : struct, Enum
+@implements IIcon<TIcon>
+
+<i class="@_css @Color?.ToTextColor() @FontSize.Kabobify() @Class"/>
+
+@code {
+    [Parameter]
+    public IconSet IconSet { get; set; } = IconSet.Default;
+
+    [Parameter]
+    public TIcon IconName { get; set; } = default!;
+
+    [Parameter]
+    public FontSize FontSize { get; set; }
+
+    [Parameter]
+    public BootstrapColor? Color { get; set; }
+
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    public string CSS { get => _css; set => _css = value; }
+
+    private string _css = "";
+
+    protected override void OnParametersSet()
+    {
+        string prefix = IconSet.Prefix();
+        string iconName = IconName.Kabobify();
+        _css = $"{prefix} {iconName}";
+        base.OnParametersSet();
+    }
+}

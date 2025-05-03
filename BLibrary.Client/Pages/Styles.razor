@@ -18,13 +18,6 @@
     <style>
         @PreviewStyles
     </style>
-    <div class="container">
-        <div class="row">
-            <div class="col mx-auto">
-                @((MarkupString)PreviewStyles.Replace("\n", "<br />"))
-            </div>
-        </div>
-    </div>
 }
 
 
@@ -91,7 +84,7 @@
 
             _compilationService.ColorSection = response.ColorSection.Rules;
         }
-     
+
         DynamicParams.Add("CurrentSection", CurrentSection);
         DynamicParams.Add("ColorSection", _compilationService.ColorSection);
 

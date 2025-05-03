@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Blibrary.Shared.Enums.UI;
-public enum IconVendor
+public enum IconSet
 {
     Default,
     FontAwesome,
@@ -16,13 +16,13 @@ public enum IconVendor
 
 public static class IconVendorExtensions
 {
-    public static string Prefix(this IconVendor vendor)
+    public static string Prefix(this IconSet vendor)
     {
         return vendor switch
         {
-            IconVendor.FontAwesome => "fa",
-            IconVendor.FontAwesomeLight => "fal",
-            IconVendor.FontAwesomeSolid => "fas",
+            IconSet.FontAwesome => "fa",
+            IconSet.FontAwesomeLight => "fal",
+            IconSet.FontAwesomeSolid => "fas",
             _ => "bi"
         };
     }

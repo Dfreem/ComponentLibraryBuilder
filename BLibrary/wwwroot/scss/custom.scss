@@ -10,13 +10,14 @@ $theme-colors: map-merge-multiple($theme-colors, $all-colors, ("primary": $prima
 
 @import "../lib/bootstrap/scss/maps";
 @import "../lib/bootstrap/scss/mixins";
-@import "../lib/bootstrap/scss/root";
 @import "../lib/bootstrap/scss/utilities";
-@import "../lib/bootstrap/scss/helpers/_focus-ring.scss";
+@import "../lib/bootstrap/scss/root";
+@import "../lib/bootstrap/scss/reboot";
 @import "../lib/bootstrap/scss/accordion";
 @import "../lib/bootstrap/scss/modal";
 @import "../lib/bootstrap/scss/buttons";
 @import "../lib/bootstrap/scss/card";
+@import "../lib/bootstrap/scss/helpers";
 
 @import "scroll";
 
@@ -25,6 +26,7 @@ $theme-colors: map-merge-multiple($theme-colors, $all-colors, ("primary": $prima
 @import "components/toast";
 @import "components/modal";
 @import "components/panels";
+@import "components/links-buttons";
 @import "components/template-components";
 
 // template componenets

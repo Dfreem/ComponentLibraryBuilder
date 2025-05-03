@@ -148,16 +148,6 @@ public partial class ScssVariableSection
             EndOfFile = String.Join('\n', lines);
         }
 
-        //NonEditableRules = rules.Where(r => !r.Groups[1].Value.Trim().StartsWith("--"))
-        //    .Select(r => new ScssVariable()
-        //    {
-        //        Key = r.Groups[1].Value.Trim(),
-        //        Original = r.Groups[2].Value.Trim(),
-        //        Value = r.Groups[2].Value.Trim(),
-        //        IsVariable = false
-        //    })
-        //    .ToList();
-
         var ruleList = rules.Where(r => r.Success && !r.Groups[1].Value.Contains("zindex") && !NonEditableRules.Any(s => s.Key == r.Groups[1].Value.Trim())) // ignore z-index variables
             .Select(r => new ScssVariable()
             {

@@ -1,0 +1,9 @@
+﻿a:not([disabled='disabled']){
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.icon-link {
+    text-decoration: none !important;
+}

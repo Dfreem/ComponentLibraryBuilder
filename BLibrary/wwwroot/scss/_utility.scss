@@ -35,6 +35,10 @@
     .vh-#{$i} {
         height: calc($i * 1vh);
     }
+
+    .fs-#{$i}{
+        font-size: calc($i * 1pt);
+    }
 }
 
 // SIZES
